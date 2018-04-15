@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">OrgelHelfer</string>
+    <string name="no_midi_service_title">Midi Not Supported</string>
+    <string name="no_midi_service">Midi Not Supported on this device.\nPlease try using a different Device.</string>
+</resources>
