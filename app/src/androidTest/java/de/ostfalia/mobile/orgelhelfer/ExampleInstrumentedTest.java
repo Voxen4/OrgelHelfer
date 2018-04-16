@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.widget.ListView;
 
 import org.json.JSONException;
 import org.junit.Assert;
@@ -53,5 +54,22 @@ public class ExampleInstrumentedTest {
         MidiScope.writeMidiJsonExternal();
         String path = Environment.getExternalStorageDirectory().getPath() + File.separator + "OrgelHelfer"+File.separator+"track.json";
         Assert.assertEquals(true,new File(path).exists());
+    }
+
+    @Test
+    public void textListView() throws InterruptedException {
+        BaseActivity activity = mActivityRule.getActivity();
+        String[] texts = new String[100];
+        for(int i = 0; i < 100;i++){
+            String text = "Test: "+i;
+            activity.log(text);
+            texts[i] = text;
+        }
+        Thread.sleep(100);
+        Assert.assertArrayEquals(texts,activity.log.toArray());
+        ListView listView = (ListView)activity.findViewById(R.id.list);
+        Assert.assertEquals(100,listView.getAdapter().getCount());
+        //Yes i'm paranoid, that's why im Ui testing here.
+
     }
 }

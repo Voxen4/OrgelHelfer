@@ -1,31 +1,25 @@
 package de.ostfalia.mobile.orgelhelfer;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiManager;
 import android.media.midi.MidiReceiver;
-import android.os.Environment;
-import android.os.Handler;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
+import android.widget.Button;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
-import de.ostfalia.mobile.orgelhelfer.adapter.MidiDeviceAdapter;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiDataReceiver;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiFramer;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiOutputPortSelector;
@@ -40,6 +34,9 @@ public class BaseActivity extends AppCompatActivity implements ScopeLogger {
     private MidiOutputPortSelector mLogSenderSelector;
     private MidiReceiver midiReceiver;
     private MidiFramer midiFramer;
+    private ListView listView;
+    private boolean recording;
+    List<String> log;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +62,7 @@ public class BaseActivity extends AppCompatActivity implements ScopeLogger {
         mLogSenderSelector.getSender().connect(midiFramer);
         MidiScope.setScopeLogger(this);
         checkPermissions();
+        listView = (ListView) findViewById(R.id.list);
     }
 
     public MidiManager getMidiManager() {
@@ -80,8 +78,25 @@ public class BaseActivity extends AppCompatActivity implements ScopeLogger {
     }
 
     @Override
-    public void log(String text) {
-        Log.d(LOG_TAG, text);
+    public void log(final String text) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(LOG_TAG, text);
+                if (log == null) {
+                    log = new ArrayList<>();
+                    // Instanciating Adapter
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getBaseContext(),
+                            R.layout.simple_list_item_slim, log);
+
+                    // setting adapter on listview
+                    listView.setAdapter(adapter);
+                }
+                log.add(text);
+            }
+        });
+
+
     }
 
     @Override
@@ -89,6 +104,7 @@ public class BaseActivity extends AppCompatActivity implements ScopeLogger {
         super.onDestroy();
         MidiScope.writeMidiJsonExternal();
     }
+
 
     private void checkPermissions() {
         // Here, thisActivity is the current activity
@@ -111,6 +127,18 @@ public class BaseActivity extends AppCompatActivity implements ScopeLogger {
             // Permission has already been granted
         }
 
+    }
+
+    public void startRecording(View view) {
+        Button recordButton = (Button) view;
+        Log.d(LOG_TAG,"Switched recording state");
+        if (recording) {
+            recordButton.setText(R.string.start_recording);
+            recording = false;
+        } else {
+            recordButton.setText(R.string.stop_recording);
+            recording = true;
+        }
     }
 
 }
