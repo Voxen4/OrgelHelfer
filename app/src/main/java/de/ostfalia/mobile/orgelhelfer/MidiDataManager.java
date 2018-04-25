@@ -1,13 +1,8 @@
 package de.ostfalia.mobile.orgelhelfer;
 
-import android.media.midi.MidiDevice;
 import android.media.midi.MidiInputPort;
-import android.media.midi.MidiManager;
 import android.media.midi.MidiReceiver;
-import android.media.midi.MidiSender;
 import android.util.Log;
-
-import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +17,7 @@ import de.ostfalia.mobile.orgelhelfer.midi.MidiPrinter;
  * Created by kellerm on 23.04.2018.
  */
 
-class MidiDataManager{
+class MidiDataManager {
     private static final MidiDataManager ourInstance = new MidiDataManager();
     private static final String LOG_TAG = MidiDataManager.class.getSimpleName();
     public MidiReceiver receiver;
@@ -47,44 +42,50 @@ class MidiDataManager{
         mStartTime = System.nanoTime();
     }
 
-    public interface OnMidiDataListener {
-        void onMidiData(MidiEvent event);
+    /**
+     * Notifying Listeners for MidiData, the send Data is already formatted
+     *
+     * @param midiNote
+     */
+    private void notifyDataListeners(MidiNote midiNote) {
+        for (int i = 0; i < listeners.size(); i++) {
+            listeners.get(i).onMidiData(midiNote, System.currentTimeMillis());
+        }
     }
 
     public void addOnMidiDataListener(OnMidiDataListener listener) {
         listeners.add(listener);
     }
 
-    /**
-     * Notifying Listeners for MidiData, the send Data is already formatted
-     * @param midiEvent
-     */
-    private void notifyDataListeners(MidiEvent midiEvent) {
-        for(int i = 0;i < listeners.size();i++){
-            listeners.get(i).onMidiData(midiEvent);
-        }
-    }
-
-//Input Port has to be opened first.
-    public void sendEvent(MidiEvent event){
+    //Input Port has to be opened first.
+    public void sendEvent(MidiNote event) {
         //TODO Create parseable Event
         MidiInputPort inputPort = MidiConnectionManager.getInstance().getInputPort();
-        if(sender== null) return;
+        if (sender == null) return;
         byte[] buffer = new byte[32];
         int numBytes = 0;
-        int channel = 3; // MIDI channels 1-16 are encoded as 0-15.
+        buffer[numBytes++] = event.getChannel();//Not sure status byte ?
+        buffer[numBytes++] = event.getPitch();
+        buffer[numBytes++] = event.getVelocity();
+        int offset = 0;
+        /*int channel = 3; // MIDI channels 1-16 are encoded as 0-15.
         buffer[numBytes++] = (byte) (0x90 + (channel - 1)); // note on
         buffer[numBytes++] = (byte) 60; // pitch is middle C
         buffer[numBytes++] = (byte) 127; // max velocity
-        int offset = 0;
+      */
 // post is non-blocking
         try {
             inputPort.send(buffer, offset, numBytes);
         } catch (IOException e) {
             e.printStackTrace();
-            Log.d(LOG_TAG,"Couldn't send Event: "+event.toString()+", Error: "+e.toString());
+            Log.d(LOG_TAG, "Couldn't send Event: " + event.toString() + ", Error: " + e.toString());
         }
     }
+
+    public interface OnMidiDataListener {
+        void onMidiData(MidiNote event, long timestamp);
+    }
+
     private final class Receiver extends MidiReceiver {
 
 
@@ -99,17 +100,17 @@ class MidiDataManager{
          * Also, modifying the contents of the msg array parameter may result in other receivers
          * in the same application receiving incorrect values in their {link #onSend} method.
          *
-         * @param data       a byte array containing the MIDI data
+         * @param data      a byte array containing the MIDI data
          * @param offset    the offset of the first byte of the data in the array to be processed
          * @param count     the number of bytes of MIDI data in the array to be processed
          * @param timestamp the timestamp of the message (based on {@link System#nanoTime}
          * @throws IOException
          */
         @Override
-        public void onSend(byte[] data, int offset, int count, long timestamp) throws IOException {
+        public void onSend(byte[] data, int offset, int count, long timestamp) {
             int sysExStartOffset = (mInSysEx ? offset : -1);
 
-            Log.d("MIDIFRAMER_DATA", Arrays.toString(data)+","+offset+","+count+","+timestamp);
+            Log.d("MIDIFRAMER_DATA", Arrays.toString(data) + "," + offset + "," + count + "," + timestamp);
             for (int i = 0; i < count; i++) {
                 final byte currentByte = data[offset];
                 final int currentInt = currentByte & 0xFF;
@@ -163,7 +164,6 @@ class MidiDataManager{
             }
 
 
-
             // send any accumulatedSysEx data
             if (sysExStartOffset >= 0 && sysExStartOffset < offset) {
                 parseOnSend(data, sysExStartOffset,
@@ -171,7 +171,8 @@ class MidiDataManager{
             }
 
         }
-        private void parseOnSend(byte[] data, int sysExStartOffset, int i, long timestamp){
+
+        private void parseOnSend(byte[] data, int sysExStartOffset, int i, long timestamp) {
 
             StringBuilder sb = new StringBuilder();
             if (timestamp == 0) {
@@ -195,7 +196,16 @@ class MidiDataManager{
                 Log.d(LOG_TAG, "Error while Adding Json Object: " + e.toString());
             }*/
             //TODO PARSe to Event if possible
-            MidiDataManager.getInstance().notifyDataListeners(MidiEvent.KEY);
+            if (MidiConstants.isAllActiveSensing(data, sysExStartOffset, i)) {
+                return;
+            }
+            byte statusByte = data[sysExStartOffset];
+            int status = statusByte & 0xFF;
+            //TODO Hier gegebenenfalls die System Messages rausfiltern
+            if (MidiPrinter.getType(status) == MidiConstants.MessageTypes.STATUS_NOTE_ON) {
+                MidiNote temp = new MidiNote(MidiPrinter.getType(status).getType(), data[sysExStartOffset++], data[sysExStartOffset++], data[sysExStartOffset++]);
+                MidiDataManager.getInstance().notifyDataListeners(temp);
+            }
         }
     }
 

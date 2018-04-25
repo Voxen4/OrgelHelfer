@@ -10,15 +10,15 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class MidiEventArrayAdapter extends ArrayAdapter<MidiEvent> {
+public class MidiEventArrayAdapter extends ArrayAdapter<MidiNote> {
     private Activity activity;
-    private List<MidiEvent> event;
+    private List<MidiNote> event;
     private static LayoutInflater inflater = null;
 
-    public MidiEventArrayAdapter(Activity activity, int textViewResourceId, List<MidiEvent> _MidiEvent) {
-        super(activity, textViewResourceId, _MidiEvent);
+    public MidiEventArrayAdapter(Activity activity, int textViewResourceId, List<MidiNote> _MidiNote) {
+        super(activity, textViewResourceId, _MidiNote);
         this.activity = activity;
-        this.event = _MidiEvent;
+        this.event = _MidiNote;
 
         inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -28,7 +28,7 @@ public class MidiEventArrayAdapter extends ArrayAdapter<MidiEvent> {
         return event.size();
     }
 
-    public MidiEvent getItem(int position) {
+    public MidiNote getItem(int position) {
         return event.get(position);
     }
 
@@ -42,7 +42,7 @@ public class MidiEventArrayAdapter extends ArrayAdapter<MidiEvent> {
         if (convertView == null) {
             vi = inflater.inflate(R.layout.simple_list_item_slim, null);
         }
-        vi = (TextView) vi.findViewById(R.id.text1);
+        vi = vi.findViewById(R.id.text1);
         ((TextView) vi).setText(getItem(position).toString());
 
         return vi;

@@ -19,6 +19,7 @@ package de.ostfalia.mobile.orgelhelfer.midi;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceInfo.PortInfo;
 import android.os.Bundle;
+import android.util.Log;
 
 /**
  * Format a MIDI message for printing.
@@ -44,6 +45,7 @@ public class MidiPrinter {
             "ActiveSensing", // FE
             "Reset"        // FF
     };
+    private static final String LOG_TAG = MidiPrinter.class.getSimpleName();
 
     public static String getName(int status) {
         if (status >= 0xF0) {
@@ -55,6 +57,23 @@ public class MidiPrinter {
         } else {
             return "data";
         }
+    }
+
+    public static MidiConstants.MessageTypes getType(int status) {
+        String typeString = getName(status);
+        MidiConstants.MessageTypes type = null;
+        //TODO ADD More relevant events
+        switch (typeString) {
+            case "NoteOn":
+                type = MidiConstants.MessageTypes.STATUS_NOTE_ON;
+                break;
+            case "ActiveSensing":
+                type = MidiConstants.MessageTypes.STATUS_ACTIVE_SENSING;
+        }
+        if (type == null) {
+            Log.d(LOG_TAG, "No MessageType Matching " + typeString + " found.");
+        }
+        return type;
     }
 
     public static String formatBytes(byte[] data, int offset, int count) {

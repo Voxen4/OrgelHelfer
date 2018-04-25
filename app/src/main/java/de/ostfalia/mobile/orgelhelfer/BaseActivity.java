@@ -23,7 +23,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
 
     private static final String LOG_TAG = BaseActivity.class.getSimpleName();
     private ListView listView;
-    ArrayList<MidiEvent> log = new ArrayList<>();
+    ArrayList<MidiNote> log = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +54,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
                     @Override
                     public void onItemClick(AdapterView<?> arg0, View view,
                                             int position, long id) {
-                        MidiEvent event = (MidiEvent) listView.getItemAtPosition(position);
+                        MidiNote event = (MidiNote) listView.getItemAtPosition(position);
                         MidiDataManager.getInstance().sendEvent(event);
                     }
                 }
@@ -123,11 +123,11 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
     }
 
     @Override
-    public void onMidiData(final MidiEvent event) {
+    public void onMidiData(final MidiNote event, long timestamp) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Log.d(LOG_TAG, event.getUrl());
+                Log.d(LOG_TAG, event.toString());
                 log.add(event);
             }
         });
