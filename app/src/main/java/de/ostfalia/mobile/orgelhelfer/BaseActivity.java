@@ -2,8 +2,8 @@ package de.ostfalia.mobile.orgelhelfer;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiManager;
-import android.media.midi.MidiReceiver;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -11,63 +11,73 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import de.ostfalia.mobile.orgelhelfer.midi.MidiDataReceiver;
-import de.ostfalia.mobile.orgelhelfer.midi.MidiFramer;
-import de.ostfalia.mobile.orgelhelfer.midi.MidiOutputPortSelector;
-import de.ostfalia.mobile.orgelhelfer.midi.MidiPortWrapper;
-import de.ostfalia.mobile.orgelhelfer.midi.MidiScope;
-import de.ostfalia.mobile.orgelhelfer.midi.ScopeLogger;
-
-public class BaseActivity extends AppCompatActivity implements ScopeLogger {
+public class BaseActivity extends AppCompatActivity implements MidiDataManager.OnMidiDataListener {
 
     private static final String LOG_TAG = BaseActivity.class.getSimpleName();
-    private static MidiManager midiManager;
-    private MidiOutputPortSelector mLogSenderSelector;
-    private MidiReceiver midiReceiver;
-    private MidiFramer midiFramer;
     private ListView listView;
-    private boolean recording;
-    List<String> log;
+    ArrayList<MidiEvent> log = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        midiManager = (MidiManager) getSystemService(MIDI_SERVICE);
-        if (!getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_MIDI)) {
+        MidiManager midiManager = (MidiManager) getSystemService(MIDI_SERVICE);
+        checkPermissions();
+        setupUi();
+        if (getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_MIDI)) {
             // do MIDI stuff
+            // Setup a menu to select an input source.
+            MidiConnectionManager.getInstance().setMidiManager(midiManager);
+            MidiConnectionManager.getInstance().setupDevices();
+            MidiDataManager.getInstance().addOnMidiDataListener(this);
+        } else {
             Log.d(LOG_TAG, "NO MIDI Support for this Device");
             noMidiSupportAlert(false).show();
         }
-        //Receiver of the converted MidiData
-        midiReceiver = new MidiDataReceiver();
-        //Converter for MidiData
-        midiFramer = new MidiFramer(midiReceiver);
-        // Setup a menu to select an input source.
-        mLogSenderSelector = new MidiOutputPortSelector(midiManager, this, R.id.spinner) {
-            @Override
-            public void onPortSelected(final MidiPortWrapper wrapper) {
-                super.onPortSelected(wrapper);
-            }
-        };
-        mLogSenderSelector.getSender().connect(midiFramer);
-        MidiScope.setScopeLogger(this);
-        checkPermissions();
-        listView = (ListView) findViewById(R.id.list);
     }
 
-    public MidiManager getMidiManager() {
-        return midiManager;
+    private void setupUi() {
+
+        listView = findViewById(R.id.list);
+        ArrayAdapter adapter = new MidiEventArrayAdapter(this, R.layout.simple_list_item_slim, log);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> arg0, View view,
+                                            int position, long id) {
+                        MidiEvent event = (MidiEvent) listView.getItemAtPosition(position);
+                        MidiDataManager.getInstance().sendEvent(event);
+                    }
+                }
+        );
+
+        final Spinner spinner = findViewById(R.id.spinner);
+        ArrayAdapter arrayAdapter =
+                new ArrayAdapter<MidiDeviceInfo>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, MidiConnectionManager.getInstance().devices);
+        adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        spinner.setAdapter(arrayAdapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                MidiConnectionManager.getInstance().connectToDevice((MidiDeviceInfo) spinner.getItemAtPosition(position));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
+
 
     public AlertDialog noMidiSupportAlert(boolean cancelable) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -78,31 +88,8 @@ public class BaseActivity extends AppCompatActivity implements ScopeLogger {
     }
 
     @Override
-    public void log(final String text) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(LOG_TAG, text);
-                if (log == null) {
-                    log = new ArrayList<>();
-                    // Instanciating Adapter
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getBaseContext(),
-                            R.layout.simple_list_item_slim, log);
-
-                    // setting adapter on listview
-                    listView.setAdapter(adapter);
-                }
-                log.add(text);
-            }
-        });
-
-
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        MidiScope.writeMidiJsonExternal();
+    public void onPause() {
+        super.onPause();
     }
 
 
@@ -130,15 +117,43 @@ public class BaseActivity extends AppCompatActivity implements ScopeLogger {
     }
 
     public void startRecording(View view) {
-        Button recordButton = (Button) view;
+        final Button recordButton = (Button) view;
         Log.d(LOG_TAG,"Switched recording state");
-        if (recording) {
-            recordButton.setText(R.string.start_recording);
-            recording = false;
-        } else {
-            recordButton.setText(R.string.stop_recording);
-            recording = true;
-        }
+        //TODO Add recording
     }
 
+    @Override
+    public void onMidiData(final MidiEvent event) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(LOG_TAG, event.getUrl());
+                log.add(event);
+            }
+        });
+    }
+
+    public static void writeMidiJsonExternal() {
+       /* Writer output = null;
+        JSONObject jsonData = ((MidiDataReceiver) mDeviceFramer.getmReceiver()).getJsonData();
+        if (jsonData == null) {
+            Log.d(LOG_TAG,"Json data is null");
+            return;
+        }
+        String path = Environment.getExternalStorageDirectory().getPath() + File.separator + "OrgelHelfer";
+        File folder = new File(path + File.separator);
+        if (!folder.exists()) {
+            folder.mkdir();
+        }
+        File file = new File(folder + File.separator + "track.json");
+        file.delete();
+        try {
+            output = new BufferedWriter(new FileWriter(file));
+            output.write(jsonData.toString());
+            output.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d(LOG_TAG, "Couldn't save Json Data");
+        }*/
+    }
 }

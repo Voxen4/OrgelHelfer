@@ -16,7 +16,6 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.IOException;
 
-import de.ostfalia.mobile.orgelhelfer.midi.MidiDataReceiver;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiScope;
 
 import static org.junit.Assert.*;
@@ -72,4 +71,5 @@ public class ExampleInstrumentedTest {
         //Yes i'm paranoid, that's why im Ui testing here.
 
     }
+
 }
