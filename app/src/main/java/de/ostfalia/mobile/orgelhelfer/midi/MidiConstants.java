@@ -114,7 +114,7 @@ public class MidiConstants {
             return type;
         }
 
-        public MessageTypes getTypeByByte(byte _byte) {
+        public static MessageTypes getTypeByByte(byte _byte) {
             MessageTypes[] arr = values();
             MessageTypes types = null;
             for (int i = 0; i < arr.length; i++) {

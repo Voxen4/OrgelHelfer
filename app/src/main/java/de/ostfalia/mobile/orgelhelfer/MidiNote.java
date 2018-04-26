@@ -15,6 +15,7 @@ public class MidiNote {
     private byte channel; //MIDI channels 1-16 are encoded as 0-15.
     private byte pitch;
     private byte velocity; // between 0 and 127
+    private long timestamp;
     //90 2D 1D: NoteOn(1, 45, 29)
 
 
@@ -23,6 +24,7 @@ public class MidiNote {
         channel = _channel;
         pitch = _pitch;
         velocity = _velocity;
+        timestamp = System.currentTimeMillis();
     }
 
     public byte getmType() {
@@ -39,6 +41,14 @@ public class MidiNote {
 
     public byte getVelocity() {
         return velocity;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long _timestamp) {
+        timestamp = _timestamp;
     }
 
 }

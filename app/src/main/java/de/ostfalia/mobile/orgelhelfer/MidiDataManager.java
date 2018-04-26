@@ -49,7 +49,7 @@ class MidiDataManager {
      */
     private void notifyDataListeners(MidiNote midiNote) {
         for (int i = 0; i < listeners.size(); i++) {
-            listeners.get(i).onMidiData(midiNote, System.currentTimeMillis());
+            listeners.get(i).onMidiData(midiNote);
         }
     }
 
@@ -83,7 +83,7 @@ class MidiDataManager {
     }
 
     public interface OnMidiDataListener {
-        void onMidiData(MidiNote event, long timestamp);
+        void onMidiData(MidiNote event);
     }
 
     private final class Receiver extends MidiReceiver {
