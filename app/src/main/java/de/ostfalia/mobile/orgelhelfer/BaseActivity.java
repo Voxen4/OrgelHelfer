@@ -1,10 +1,13 @@
 package de.ostfalia.mobile.orgelhelfer;
 
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiManager;
 import android.os.Bundle;
+import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -17,13 +20,28 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
+
+import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 
 public class BaseActivity extends AppCompatActivity implements MidiDataManager.OnMidiDataListener {
 
     private static final String LOG_TAG = BaseActivity.class.getSimpleName();
-    private ListView listView;
+    private static final String TRACK_NUMBER = "TRACK_NUMBER";
     ArrayList<MidiNote> log = new ArrayList<>();
+    SharedPreferences preference;
+    private ListView listView;
+    private boolean recording;
+    private JSONObject jsonData;
+    private int track;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +60,8 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
             Log.d(LOG_TAG, "NO MIDI Support for this Device");
             noMidiSupportAlert(false).show();
         }
+        preference = PreferenceManager.getDefaultSharedPreferences(this);
+        track = preference.getInt(TRACK_NUMBER, -1);
     }
 
     private void setupUi() {
@@ -90,6 +110,9 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
     @Override
     public void onPause() {
         super.onPause();
+        SharedPreferences.Editor editor = preference.edit();
+        editor.putInt(TRACK_NUMBER, track);
+        editor.apply();
     }
 
 
@@ -118,26 +141,74 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
 
     public void startRecording(View view) {
         final Button recordButton = (Button) view;
-        Log.d(LOG_TAG,"Switched recording state");
-        //TODO Add recording
+        if (recording) {
+            recording = false;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    recordButton.setText(R.string.start_recording);
+                }
+            });
+            writeMidiJsonExternal();
+        } else {
+            jsonData = new JSONObject();
+            try {
+                jsonData.put("recording", ((Long) System.currentTimeMillis()).toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Log.d(LOG_TAG, "Error while switching recording " + e.toString());
+            }
+            recording = true;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    recordButton.setText(R.string.stop_recording);
+                }
+            });
+        }
+        Log.d(LOG_TAG, "Switched recording state");
+    }
+
+    public void debugCode(View view) {
+        for (int i = 0; i < 100; i++) {
+            MidiNote note = MidiNote.MIDDLEC;
+            note.setTimestamp(note.getTimestamp() + 1);
+            onMidiData(note);
+        }
+        Log.d(LOG_TAG, "Debug Code executed");
     }
 
     @Override
-    public void onMidiData(final MidiNote event, long timestamp) {
+    public void onMidiData(final MidiNote event) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Log.d(LOG_TAG, event.toString());
                 log.add(event);
+                ((MidiEventArrayAdapter) listView.getAdapter()).notifyDataSetChanged();
+                if (recording) {
+                    JSONObject jsonObject = new JSONObject();
+                    try {
+                        jsonObject.put("Type", MidiConstants.MessageTypes.getTypeByByte(event.getmType()));
+                        jsonObject.put("Channel", event.getChannel());
+                        jsonObject.put("Pitch", event.getChannel());
+                        jsonObject.put("Velocity", event.getChannel());
+                        jsonObject.put("Timestamp", event.getTimestamp());
+                        jsonData.put("Note" + jsonData.length(), jsonObject);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.d(LOG_TAG, "Error while adding Note to JSON");
+                    }
+                }
+
             }
         });
     }
 
-    public static void writeMidiJsonExternal() {
-       /* Writer output = null;
-        JSONObject jsonData = ((MidiDataReceiver) mDeviceFramer.getmReceiver()).getJsonData();
+    public void writeMidiJsonExternal() {
+        Writer output = null;
         if (jsonData == null) {
-            Log.d(LOG_TAG,"Json data is null");
+            Log.d(LOG_TAG, "Json data is null");
             return;
         }
         String path = Environment.getExternalStorageDirectory().getPath() + File.separator + "OrgelHelfer";
@@ -145,8 +216,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         if (!folder.exists()) {
             folder.mkdir();
         }
-        File file = new File(folder + File.separator + "track.json");
-        file.delete();
+        File file = new File(folder + File.separator + "track" + ++track + ".json");
         try {
             output = new BufferedWriter(new FileWriter(file));
             output.write(jsonData.toString());
@@ -154,6 +224,10 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         } catch (IOException e) {
             e.printStackTrace();
             Log.d(LOG_TAG, "Couldn't save Json Data");
-        }*/
+        }
+    }
+
+    public JSONObject getJson() {
+        return jsonData;
     }
 }

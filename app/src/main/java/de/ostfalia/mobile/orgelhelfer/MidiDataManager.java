@@ -20,26 +20,24 @@ import de.ostfalia.mobile.orgelhelfer.midi.MidiPrinter;
 class MidiDataManager {
     private static final MidiDataManager ourInstance = new MidiDataManager();
     private static final String LOG_TAG = MidiDataManager.class.getSimpleName();
+    private static final long NANOS_PER_SECOND = TimeUnit.SECONDS.toNanos(1);
     public MidiReceiver receiver;
     public MidiReceiver sender;
     private ArrayList<OnMidiDataListener> listeners = new ArrayList<>();
-
     private byte[] mBuffer = new byte[3];
     private int mCount;
     private byte mRunningStatus;
     private int mNeeded;
     private boolean mInSysEx;
-
-    private static final long NANOS_PER_SECOND = TimeUnit.SECONDS.toNanos(1);
     private long mStartTime;
-
-    static MidiDataManager getInstance() {
-        return ourInstance;
-    }
 
     private MidiDataManager() {
         receiver = new Receiver();
         mStartTime = System.nanoTime();
+    }
+
+    static MidiDataManager getInstance() {
+        return ourInstance;
     }
 
     /**
@@ -49,7 +47,7 @@ class MidiDataManager {
      */
     private void notifyDataListeners(MidiNote midiNote) {
         for (int i = 0; i < listeners.size(); i++) {
-            listeners.get(i).onMidiData(midiNote, System.currentTimeMillis());
+            listeners.get(i).onMidiData(midiNote);
         }
     }
 
@@ -83,7 +81,7 @@ class MidiDataManager {
     }
 
     public interface OnMidiDataListener {
-        void onMidiData(MidiNote event, long timestamp);
+        void onMidiData(MidiNote event);
     }
 
     private final class Receiver extends MidiReceiver {
