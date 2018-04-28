@@ -212,6 +212,7 @@ class MidiDataManager {
                 MidiNote temp = new MidiNote(MidiPrinter.getType(status).getType(), data[sysExStartOffset++], data[sysExStartOffset++], data[sysExStartOffset++]);
                 MidiDataManager.getInstance().notifyDataListeners(temp);
             }
+            Log.d(LOG_TAG, "MidiEventType: " + MidiPrinter.getType(status));
         }
     }
 

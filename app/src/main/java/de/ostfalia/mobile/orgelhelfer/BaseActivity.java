@@ -1,22 +1,22 @@
 package de.ostfalia.mobile.orgelhelfer;
 
 import android.Manifest;
-import android.content.SharedPreferences;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 
@@ -40,14 +40,11 @@ import static android.widget.AdapterView.OnItemSelectedListener;
 public class BaseActivity extends AppCompatActivity implements MidiDataManager.OnMidiDataListener, MidiConnectionManager.OnDeviceChangedListener {
 
     private static final String LOG_TAG = BaseActivity.class.getSimpleName();
-    private static final String TRACK_NUMBER = "TRACK_NUMBER";
-    ArrayList<MidiNote> log = new ArrayList<>();
-    SharedPreferences preference;
     private ListView listView;
     private Spinner spinner;
     private boolean recording;
     private JSONObject jsonData;
-    private int track;
+    ArrayList<MidiNote> log = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,9 +64,6 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
             Log.d(LOG_TAG, "NO MIDI Support for this Device");
             noMidiSupportAlert(false).show();
         }
-        preference = PreferenceManager.getDefaultSharedPreferences(this);
-        track = preference.getInt(TRACK_NUMBER, -1);
-
         listView = findViewById(R.id.list);
         ArrayAdapter adapter = new MidiEventArrayAdapter(this, R.layout.simple_list_item_slim, log);
         listView.setAdapter(adapter);
@@ -105,7 +99,6 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
     }
 
 
-
     public AlertDialog noMidiSupportAlert(boolean cancelable) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setCancelable(cancelable);
@@ -117,9 +110,6 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
     @Override
     public void onPause() {
         super.onPause();
-        SharedPreferences.Editor editor = preference.edit();
-        editor.putInt(TRACK_NUMBER, track);
-        editor.apply();
         MidiConnectionManager.getInstance().removeOnDevicesChangedListener(this);
         MidiDataManager.getInstance().removeOnMidiDataListener(this);
     }
@@ -158,7 +148,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
                     recordButton.setText(R.string.start_recording);
                 }
             });
-            writeMidiJsonExternal();
+            showSaveRecordingDialog();
         } else {
             jsonData = new JSONObject();
             try {
@@ -177,7 +167,6 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         }
         Log.d(LOG_TAG, "Switched recording state");
     }
-
 
     @Override
     public void onMidiData(final MidiNote event) {
@@ -206,6 +195,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         });
     }
 
+
     @Override
     public void onDevicesChanged(List<CustomMidiDeviceInfo> deviceInfo) {
         Spinner spinner = findViewById(R.id.spinner);
@@ -216,7 +206,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         spinner.setAdapter(arrayAdapter);
     }
 
-    public void writeMidiJsonExternal() {
+    public void writeMidiJsonExternal(String name) {
         Writer output = null;
         if (jsonData == null) {
             Log.d(LOG_TAG, "Json data is null");
@@ -227,7 +217,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         if (!folder.exists()) {
             folder.mkdir();
         }
-        File file = new File(folder + File.separator + "track" + ++track + ".json");
+        File file = new File(folder + File.separator + name + ".json");
         try {
             output = new BufferedWriter(new FileWriter(file));
             output.write(jsonData.toString());
@@ -238,8 +228,33 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         }
     }
 
+    public void showSaveRecordingDialog() {
+        //Usage of Layoutinfalter with Custom layout: https://goo.gl/FNdUjN
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.custom_dialog, null);
+        dialogBuilder.setView(dialogView);
+
+        final EditText edt = dialogView.findViewById(R.id.edit1);
+
+        dialogBuilder.setTitle("Choose a Filename");
+        dialogBuilder.setMessage(getString(R.string.external_folder_saving));
+        dialogBuilder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                writeMidiJsonExternal(edt.getText().toString());
+            }
+        });
+        dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                //pass
+            }
+        });
+        AlertDialog b = dialogBuilder.create();
+        b.show();
+    }
+
+
     public JSONObject getJson() {
         return jsonData;
     }
-    
 }
