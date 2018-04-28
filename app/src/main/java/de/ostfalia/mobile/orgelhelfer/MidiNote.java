@@ -52,7 +52,7 @@ public class MidiNote {
     }
 
     public String toString() {
-        return "Type: " + MidiConstants.MessageTypes.getTypeByByte(mType) + "(" + channel + "," + pitch + "," + velocity + "," + timestamp + ")";
+        return MidiConstants.MessageTypes.getTypeByByte(mType) + "(" + channel + "," + pitch + "," + velocity + "," + timestamp + ")";
     }
 
 }

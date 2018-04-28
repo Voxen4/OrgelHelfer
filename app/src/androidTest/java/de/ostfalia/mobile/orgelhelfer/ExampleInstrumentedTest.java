@@ -52,6 +52,29 @@ public class ExampleInstrumentedTest {
         ListView listView = activity.findViewById(R.id.list);
         Assert.assertEquals(100, listView.getAdapter().getCount());
         //Yes i'm paranoid, that's why im Ui testing here.
+    }
+
+    @Test
+    public void testListViewOnClick() throws InterruptedException {
+        BaseActivity activity = mActivityRule.getActivity();
+        MidiNote[] texts = new MidiNote[100];
+        for (int i = 0; i < 100; i++) {
+            MidiNote note = MidiNote.MIDDLEC;
+            note.setTimestamp(note.getTimestamp() + 1);
+            texts[i] = note;
+            activity.onMidiData(note);
+        }
+        Thread.sleep(100);
+        final ListView listView = activity.findViewById(R.id.list);
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                boolean itemCLick = itemCLick = listView.performItemClick(listView, 2, listView.getItemIdAtPosition(2));
+                Assert.assertEquals(true, itemCLick);
+            }
+        });
+        //Yes i'm paranoid, that's why im Ui testing here.
 
     }
 

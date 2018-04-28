@@ -29,16 +29,22 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.List;
 
+import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 
-public class BaseActivity extends AppCompatActivity implements MidiDataManager.OnMidiDataListener {
+import static android.widget.AdapterView.OnItemClickListener;
+import static android.widget.AdapterView.OnItemSelectedListener;
+
+public class BaseActivity extends AppCompatActivity implements MidiDataManager.OnMidiDataListener, MidiConnectionManager.OnDeviceChangedListener {
 
     private static final String LOG_TAG = BaseActivity.class.getSimpleName();
     private static final String TRACK_NUMBER = "TRACK_NUMBER";
     ArrayList<MidiNote> log = new ArrayList<>();
     SharedPreferences preference;
     private ListView listView;
+    private Spinner spinner;
     private boolean recording;
     private JSONObject jsonData;
     private int track;
@@ -49,28 +55,26 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         setContentView(R.layout.activity_main);
         MidiManager midiManager = (MidiManager) getSystemService(MIDI_SERVICE);
         checkPermissions();
-        setupUi();
+
         if (getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_MIDI)) {
             // do MIDI stuff
             // Setup a menu to select an input source.
             MidiConnectionManager.getInstance().setMidiManager(midiManager);
             MidiConnectionManager.getInstance().setupDevices();
             MidiDataManager.getInstance().addOnMidiDataListener(this);
+            MidiConnectionManager.getInstance().addOnDevicesChangedListener(this);
         } else {
             Log.d(LOG_TAG, "NO MIDI Support for this Device");
             noMidiSupportAlert(false).show();
         }
         preference = PreferenceManager.getDefaultSharedPreferences(this);
         track = preference.getInt(TRACK_NUMBER, -1);
-    }
-
-    private void setupUi() {
 
         listView = findViewById(R.id.list);
         ArrayAdapter adapter = new MidiEventArrayAdapter(this, R.layout.simple_list_item_slim, log);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
+                new OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> arg0, View view,
                                             int position, long id) {
@@ -80,15 +84,17 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
                 }
         );
 
-        final Spinner spinner = findViewById(R.id.spinner);
-        ArrayAdapter arrayAdapter =
-                new ArrayAdapter<MidiDeviceInfo>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, MidiConnectionManager.getInstance().devices);
+        spinner = findViewById(R.id.spinner);
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        ArrayAdapter<CustomMidiDeviceInfo> arrayAdapter =
+                new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, MidiConnectionManager.getInstance().getDevices());
         spinner.setAdapter(arrayAdapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                MidiConnectionManager.getInstance().connectToDevice((MidiDeviceInfo) spinner.getItemAtPosition(position));
+                Log.d(LOG_TAG, "Item Selected " + position);
+                CustomMidiDeviceInfo deviceInfo = (CustomMidiDeviceInfo) spinner.getItemAtPosition(position);
+                MidiConnectionManager.getInstance().connectToDevice(deviceInfo);
             }
 
             @Override
@@ -97,6 +103,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
             }
         });
     }
+
 
 
     public AlertDialog noMidiSupportAlert(boolean cancelable) {
@@ -113,6 +120,8 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         SharedPreferences.Editor editor = preference.edit();
         editor.putInt(TRACK_NUMBER, track);
         editor.apply();
+        MidiConnectionManager.getInstance().removeOnDevicesChangedListener(this);
+        MidiDataManager.getInstance().removeOnMidiDataListener(this);
     }
 
 
@@ -169,14 +178,6 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         Log.d(LOG_TAG, "Switched recording state");
     }
 
-    public void debugCode(View view) {
-        for (int i = 0; i < 100; i++) {
-            MidiNote note = MidiNote.MIDDLEC;
-            note.setTimestamp(note.getTimestamp() + 1);
-            onMidiData(note);
-        }
-        Log.d(LOG_TAG, "Debug Code executed");
-    }
 
     @Override
     public void onMidiData(final MidiNote event) {
@@ -191,8 +192,8 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
                     try {
                         jsonObject.put("Type", MidiConstants.MessageTypes.getTypeByByte(event.getmType()));
                         jsonObject.put("Channel", event.getChannel());
-                        jsonObject.put("Pitch", event.getChannel());
-                        jsonObject.put("Velocity", event.getChannel());
+                        jsonObject.put("Pitch", event.getPitch());
+                        jsonObject.put("Velocity", event.getVelocity());
                         jsonObject.put("Timestamp", event.getTimestamp());
                         jsonData.put("Note" + jsonData.length(), jsonObject);
                     } catch (JSONException e) {
@@ -203,6 +204,16 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
 
             }
         });
+    }
+
+    @Override
+    public void onDevicesChanged(List<CustomMidiDeviceInfo> deviceInfo) {
+        Spinner spinner = findViewById(R.id.spinner);
+        spinner.getAdapter();
+        ArrayAdapter<CustomMidiDeviceInfo> arrayAdapter =
+                new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, deviceInfo);
+        //Had to add this listeners cause apparently spinner doesn't keep a reference to the original List.
+        spinner.setAdapter(arrayAdapter);
     }
 
     public void writeMidiJsonExternal() {
@@ -230,4 +241,5 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
     public JSONObject getJson() {
         return jsonData;
     }
+    
 }

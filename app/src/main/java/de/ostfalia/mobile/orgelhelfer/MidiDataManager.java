@@ -52,14 +52,21 @@ class MidiDataManager {
     }
 
     public void addOnMidiDataListener(OnMidiDataListener listener) {
-        listeners.add(listener);
+        if(!listeners.contains(listener)){
+            listeners.add(listener);
+        }
+    }
+
+    public void removeOnMidiDataListener(OnMidiDataListener listener){
+        listeners.remove(listener);
     }
 
     //Input Port has to be opened first.
     public void sendEvent(MidiNote event) {
         //TODO Create parseable Event
         MidiInputPort inputPort = MidiConnectionManager.getInstance().getInputPort();
-        if (sender == null) return;
+        if (sender == null || inputPort == null) return;
+        Log.d(LOG_TAG,"Sending Event "+event.toString());
         byte[] buffer = new byte[32];
         int numBytes = 0;
         buffer[numBytes++] = event.getChannel();//Not sure status byte ?
@@ -73,6 +80,7 @@ class MidiDataManager {
       */
 // post is non-blocking
         try {
+            Log.d(LOG_TAG,"Sending MidiNote: "+event.toString());
             inputPort.send(buffer, offset, numBytes);
         } catch (IOException e) {
             e.printStackTrace();
