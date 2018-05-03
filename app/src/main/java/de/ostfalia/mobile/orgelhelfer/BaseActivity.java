@@ -20,6 +20,10 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 
+import com.github.angads25.filepicker.model.DialogConfigs;
+import com.github.angads25.filepicker.model.DialogProperties;
+import com.github.angads25.filepicker.view.FilePickerDialog;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,11 +44,11 @@ import static android.widget.AdapterView.OnItemSelectedListener;
 public class BaseActivity extends AppCompatActivity implements MidiDataManager.OnMidiDataListener, MidiConnectionManager.OnDeviceChangedListener {
 
     private static final String LOG_TAG = BaseActivity.class.getSimpleName();
+    ArrayList<MidiNote> log = new ArrayList<>();
     private ListView listView;
     private Spinner spinner;
     private boolean recording;
     private JSONObject jsonData;
-    ArrayList<MidiNote> log = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -251,6 +255,20 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         });
         AlertDialog b = dialogBuilder.create();
         b.show();
+    }
+
+    public void loadRecordings(View view) {
+        DialogProperties properties = new DialogProperties();
+        properties.selection_mode = DialogConfigs.SINGLE_MODE;
+        properties.selection_type = DialogConfigs.FILE_SELECT;
+        properties.root = new File(Environment.getExternalStorageDirectory().getPath() + "/OrgelHelfer");
+        properties.error_dir = new File(DialogConfigs.DEFAULT_DIR);
+        properties.offset = new File(DialogConfigs.DEFAULT_DIR);
+        properties.extensions = new String[]{"json"};
+        FilePickerDialog dialog = new FilePickerDialog(this, properties);
+        dialog.setTitle("Select a File");
+        dialog.show();
+        //startActivity(new Intent(),new Bundle().);
     }
 
 
