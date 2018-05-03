@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiPrinter;
+import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
 
 /**
  * Created by kellerm on 23.04.2018.

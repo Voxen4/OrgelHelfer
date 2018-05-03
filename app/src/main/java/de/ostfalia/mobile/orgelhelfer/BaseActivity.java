@@ -2,6 +2,7 @@ package de.ostfalia.mobile.orgelhelfer;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.midi.MidiManager;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 
+import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
 import com.github.angads25.filepicker.view.FilePickerDialog;
@@ -27,8 +29,10 @@ import com.github.angads25.filepicker.view.FilePickerDialog;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -37,6 +41,7 @@ import java.util.List;
 
 import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
+import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
 
 import static android.widget.AdapterView.OnItemClickListener;
 import static android.widget.AdapterView.OnItemSelectedListener;
@@ -268,7 +273,35 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         FilePickerDialog dialog = new FilePickerDialog(this, properties);
         dialog.setTitle("Select a File");
         dialog.show();
-        //startActivity(new Intent(),new Bundle().);
+        dialog.setDialogSelectionListener(new DialogSelectionListener() {
+            @Override
+            public void onSelectedFilePaths(String[] files) {
+                File file = new File(files[0]);
+                JSONObject jsonObject = null;
+                if (file.exists()) {
+                    try {
+                        BufferedReader reader = new BufferedReader(new FileReader(file));
+                        StringBuilder jsonString = new StringBuilder();
+                        while (reader.ready()) {
+                            String line = reader.readLine();
+                            jsonString.append(line);
+                        }
+                        jsonObject = new JSONObject(jsonString.toString());
+                    } catch (IOException e) {
+                        Log.d(LOG_TAG, "Error Loading Recording: " + e.toString());
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        Log.d(LOG_TAG, "Error Loading Recording Wrong Json Format: " + e.toString());
+                        e.printStackTrace();
+                    }
+                    Intent intent = new Intent(BaseActivity.this, PlayerActivity.class);
+                    intent.putExtra("Song", jsonObject.toString());
+                    startActivity(intent);
+                }
+            }
+        });
+
+
     }
 
 

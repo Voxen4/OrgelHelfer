@@ -1,4 +1,4 @@
-package de.ostfalia.mobile.orgelhelfer;
+package de.ostfalia.mobile.orgelhelfer.model;
 
 
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;

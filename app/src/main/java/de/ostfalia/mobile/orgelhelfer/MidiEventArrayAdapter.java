@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
+
 public class MidiEventArrayAdapter extends ArrayAdapter<MidiNote> {
     private static LayoutInflater inflater = null;
     private Activity activity;

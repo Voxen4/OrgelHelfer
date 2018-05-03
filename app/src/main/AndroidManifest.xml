@@ -17,6 +17,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".PlayerActivity"></activity>
+
+        <service android:name=".services.MidiPlayerService"></service>
     </application>
     <uses-feature android:name="android.software.midi" android:required="true"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />

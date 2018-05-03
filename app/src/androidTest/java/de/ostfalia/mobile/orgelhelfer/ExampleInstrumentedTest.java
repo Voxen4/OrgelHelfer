@@ -15,6 +15,8 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 
+import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
+
 import static org.junit.Assert.assertEquals;
 
 /**
