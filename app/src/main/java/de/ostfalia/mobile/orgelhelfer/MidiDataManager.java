@@ -18,7 +18,7 @@ import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
  * Created by kellerm on 23.04.2018.
  */
 
-class MidiDataManager {
+public class MidiDataManager {
     private static final MidiDataManager ourInstance = new MidiDataManager();
     private static final String LOG_TAG = MidiDataManager.class.getSimpleName();
     private static final long NANOS_PER_SECOND = TimeUnit.SECONDS.toNanos(1);
@@ -37,7 +37,7 @@ class MidiDataManager {
         mStartTime = System.nanoTime();
     }
 
-    static MidiDataManager getInstance() {
+    public static MidiDataManager getInstance() {
         return ourInstance;
     }
 
@@ -66,7 +66,7 @@ class MidiDataManager {
     public void sendEvent(MidiNote event) {
         //TODO Create parseable Event
         MidiInputPort inputPort = MidiConnectionManager.getInstance().getInputPort();
-        if (sender == null || inputPort == null) return;
+        if (inputPort == null) return;
         Log.d(LOG_TAG,"Sending Event "+event.toString());
         byte[] buffer = new byte[32];
         int numBytes = 0;
@@ -74,11 +74,11 @@ class MidiDataManager {
         buffer[numBytes++] = event.getPitch();
         buffer[numBytes++] = event.getVelocity();
         int offset = 0;
-        /*int channel = 3; // MIDI channels 1-16 are encoded as 0-15.
+        /*int channel = 1; // MIDI channels 1-16 are encoded as 0-15.
         buffer[numBytes++] = (byte) (0x90 + (channel - 1)); // note on
         buffer[numBytes++] = (byte) 60; // pitch is middle C
-        buffer[numBytes++] = (byte) 127; // max velocity
-      */
+        buffer[numBytes++] = (byte) 127; // max velocity*/
+
 // post is non-blocking
         try {
             Log.d(LOG_TAG,"Sending MidiNote: "+event.toString());
@@ -212,6 +212,7 @@ class MidiDataManager {
             if (MidiPrinter.getType(status) == MidiConstants.MessageTypes.STATUS_NOTE_ON) {
                 MidiNote temp = new MidiNote(MidiPrinter.getType(status).getType(), data[sysExStartOffset++], data[sysExStartOffset++], data[sysExStartOffset++]);
                 MidiDataManager.getInstance().notifyDataListeners(temp);
+
             }
             Log.d(LOG_TAG, "MidiEventType: " + MidiPrinter.getType(status));
         }

@@ -9,7 +9,7 @@ import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
  */
 
 public class MidiNote {
-    public static MidiNote MIDDLEC = new MidiNote(MidiConstants.MessageTypes.STATUS_NOTE_ON.getType(), (byte) (0x90 + 2), (byte) 60, (byte) 127);
+    public static MidiNote MIDDLEC = new MidiNote(MidiConstants.MessageTypes.STATUS_NOTE_ON.getType(), (byte) (0x90 + 0), (byte) 60, (byte) 127);
 
     private final byte mType;
     private byte channel; //MIDI channels 1-16 are encoded as 0-15.
@@ -25,6 +25,14 @@ public class MidiNote {
         pitch = _pitch;
         velocity = _velocity;
         timestamp = System.currentTimeMillis();
+    }
+
+    public MidiNote(byte _mType, byte _channel, byte _pitch, byte _velocity, long _timestamp) {
+        mType = _mType;
+        channel = _channel;
+        pitch = _pitch;
+        velocity = _velocity;
+        timestamp = _timestamp;
     }
 
     public byte getmType() {

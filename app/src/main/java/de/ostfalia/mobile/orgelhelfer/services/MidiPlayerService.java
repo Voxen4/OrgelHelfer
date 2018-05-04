@@ -17,9 +17,14 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import java.util.List;
+
+import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.PlayerActivity;
 import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.model.Constants;
+import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
+import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
 
 import static de.ostfalia.mobile.orgelhelfer.model.Constants.START_PLAYING_RECORDING;
 
@@ -63,7 +68,33 @@ public class MidiPlayerService extends Service {
         } else if (intent.getAction().equals(START_PLAYING_RECORDING)) {
             Log.d(LOG_TAG, "Start Playing the Recording");
             long startingTimestamp = PlayerActivity.recording.getStartingTimestamp();
+            final MidiRecording recording = PlayerActivity.recording;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    List<MidiNote> notes = recording.getRecordingList();
+                    long lastTimestamp = 0;
+                    long nextTimestamp = 0;
+                    for (int i = 0; i < notes.size(); i++) {
+                        if (!(i + 1 < notes.size())) {
+                            MidiDataManager.getInstance().sendEvent(notes.get(i));
+                            return;
+                        }
 
+                        MidiDataManager.getInstance().sendEvent(notes.get(i));
+                        nextTimestamp = notes.get(i + 1).getTimestamp();
+                        lastTimestamp = notes.get(i).getTimestamp();
+                        try {
+                            Thread.sleep(nextTimestamp - lastTimestamp);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                            Log.d(LOG_TAG, "rip");
+                        }
+                    }
+                }
+            });
+        } else {
+            Log.d(LOG_TAG, "Unkown Intent: " + intent.getAction().toString());
         }
         return START_STICKY;
     }
