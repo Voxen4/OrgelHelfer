@@ -1,19 +1,17 @@
 package de.ostfalia.mobile.orgelhelfer;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.List;
-
-import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
+import de.ostfalia.mobile.orgelhelfer.model.Constants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
+import de.ostfalia.mobile.orgelhelfer.services.MidiPlayerService;
 
 public class PlayerActivity extends AppCompatActivity {
     private static final String LOG_TAG = PlayerActivity.class.getSimpleName();
@@ -23,8 +21,12 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
-        TextView jsonText = findViewById(R.id.jsonText);
         Bundle extras = getIntent().getExtras();
+        if (extras == null) {
+            finish();
+            return;
+            //Dirty
+        }
         if (extras.containsKey("Song")) {
             try {
                 recording = MidiRecording.createRecordingFromJson(new JSONObject(extras.get("Song").toString()));
@@ -32,60 +34,52 @@ public class PlayerActivity extends AppCompatActivity {
                 e.printStackTrace();
                 finish();
             }
-            long duration = recording.getDuration();
-            Button playButton = findViewById(R.id.playButton);
-            jsonText.setText("Duration: " + duration);
-            if (MidiConnectionManager.getInstance().getInputPort() != null) {
-               /* Intent startIntent = new Intent(PlayerActivity.this, MidiPlayerService.class);
-                startIntent.setAction(Constants.MAIN_ACTION);
-                startService(startIntent);*/
+            startPlayerService();
+            final Button playButton = findViewById(R.id.playButton);
 
-            }
             playButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            List<MidiNote> notes = recording.getRecordingList();
-                            long lastTimestamp = 0;
-                            long nextTimestamp = 0;
-                            for (int i = 0; i < notes.size(); i++) {
-                                if (MidiConnectionManager.getInstance().getInputPort() == null) {
-                                    break;
-                                }
-                                if (!(i + 1 < notes.size())) {
-                                    MidiDataManager.getInstance().sendEvent(notes.get(i));
-                                    return;
-                                }
-
-                                MidiDataManager.getInstance().sendEvent(notes.get(i));
-                                nextTimestamp = notes.get(i + 1).getTimestamp();
-                                lastTimestamp = notes.get(i).getTimestamp();
-                                long dif = nextTimestamp - lastTimestamp;
-                                if (dif > 0) {
-                                    try {
-                                        Thread.sleep(dif);
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                        Log.d(LOG_TAG, "rip");
-                                    }
-                                }
-
+                    if (!MidiPlayerService.IS_SERVICE_RUNNING) {
+                        startPlayerService();
+                    }
+                    if (MidiPlayerService.IS_RECORDING_PLAYING) {
+                        Intent stopIntent = new Intent(getApplicationContext(), MidiPlayerService.class);
+                        stopIntent.setAction(Constants.STOP_PLAYING_RECORDING);
+                        startService(stopIntent);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                playButton.setText("Play");
                             }
-                        }
-                    }).start();
+                        });
+                    } else {
+                        Intent playIntent = new Intent(getApplicationContext(), MidiPlayerService.class);
+                        MidiPlayerService.IS_RECORDING_PLAYING = true;
+                        playIntent.setAction(Constants.START_PLAYING_RECORDING);
+                        startService(playIntent);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                playButton.setText("Stop");
+                            }
+                        });
+                    }
                 }
             });
         }
+    }
 
+    public void startPlayerService() {
+        Intent startIntent = new Intent(PlayerActivity.this, MidiPlayerService.class);
+        startIntent.setAction(Constants.MAIN_ACTION);
+        startService(startIntent);
 
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        finish();
     }
 
 }

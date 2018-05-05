@@ -5,5 +5,7 @@ public class Constants {
     public static final String STOP_PLAYING_RECORDING = "STOP_PLAYING_RECORDING";
     public static final int NOTIFICATION_ID = 101;
     public static final String MAIN_ACTION = "MAIN_ACTION";
+    public static final String STOP_MAIN_ACTION = "STOP_MAIN_ACTION";
+
 
 }

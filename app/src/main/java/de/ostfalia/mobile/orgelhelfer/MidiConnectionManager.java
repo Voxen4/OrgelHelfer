@@ -11,10 +11,8 @@ import android.media.midi.MidiSender;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 
@@ -23,22 +21,20 @@ import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
  * Created by kellerm on 23.04.2018.
  */
 
-class MidiConnectionManager extends MidiManager.DeviceCallback implements MidiManager.OnDeviceOpenedListener {
+public class MidiConnectionManager extends MidiManager.DeviceCallback implements MidiManager.OnDeviceOpenedListener {
     private static final MidiConnectionManager ourInstance = new MidiConnectionManager();
     private static final String LOG_TAG = MidiConnectionManager.class.getSimpleName();
     private MidiOutputPort outputPort;
     private MidiInputPort inputPort;
     private MidiManager midiManager;
     private final MidiSender midiSender;
-    private ArrayList<CustomMidiDeviceInfo> devices;
     private ArrayList<OnDeviceChangedListener> listeners = new ArrayList<>();
 
-    static MidiConnectionManager getInstance() {
+    public static MidiConnectionManager getInstance() {
         return ourInstance;
     }
 
     private MidiConnectionManager() {
-        devices = new ArrayList<>();
         midiSender = new MidiSender() {
             @Override
             public void onConnect(MidiReceiver receiver) {
@@ -55,8 +51,6 @@ class MidiConnectionManager extends MidiManager.DeviceCallback implements MidiMa
     @Override
     public void onDeviceAdded(MidiDeviceInfo device) {
         super.onDeviceAdded(device);
-        devices.add(new CustomMidiDeviceInfo(device));
-
         notifyDevicesChangedListeners();
         Log.d(LOG_TAG,"Device Added: "+ device.toString());
     }
@@ -64,7 +58,6 @@ class MidiConnectionManager extends MidiManager.DeviceCallback implements MidiMa
     @Override
     public void onDeviceRemoved(MidiDeviceInfo device) {
         super.onDeviceRemoved(device);
-        devices.remove(device);
         notifyDevicesChangedListeners();
         Log.d(LOG_TAG,"Device Removed: "+ device.toString());
     }
@@ -75,9 +68,10 @@ class MidiConnectionManager extends MidiManager.DeviceCallback implements MidiMa
         Log.d(LOG_TAG,"Device Status Changed: "+ status.toString());
     }
 
-
-    public interface OnDeviceChangedListener{
-        void onDevicesChanged(List<CustomMidiDeviceInfo> devices);
+    private void notifyDevicesChangedListeners() {
+        for (int i = 0; i < listeners.size(); i++) {
+            listeners.get(i).onDevicesChanged();
+        }
     }
 
     @Override
@@ -109,20 +103,8 @@ class MidiConnectionManager extends MidiManager.DeviceCallback implements MidiMa
         listeners.remove(listener);
     }
 
-    private void notifyDevicesChangedListeners(){
-        for (int i = 0; i < listeners.size();i++){
-            listeners.get(i).onDevicesChanged(devices);
-        }
-    }
-
-    public void setupDevices() {
-        devices.clear();
-        for (MidiDeviceInfo info : midiManager.getDevices()) {
-            if (info != null) {
-                devices.add(new CustomMidiDeviceInfo(info));
-            }
-        }
-        notifyDevicesChangedListeners();
+    public interface OnDeviceChangedListener {
+        void onDevicesChanged();
     }
 
 
@@ -135,7 +117,4 @@ class MidiConnectionManager extends MidiManager.DeviceCallback implements MidiMa
         midiManager.openDevice(deviceInfo.getDevice(), this, new Handler(Looper.getMainLooper()));
     }
 
-    public List<CustomMidiDeviceInfo> getDevices(){
-        return devices;
-    }
 }

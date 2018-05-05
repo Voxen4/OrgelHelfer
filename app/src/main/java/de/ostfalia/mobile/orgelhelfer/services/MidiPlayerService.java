@@ -19,6 +19,7 @@ import android.util.Log;
 
 import java.util.List;
 
+import de.ostfalia.mobile.orgelhelfer.MidiConnectionManager;
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.PlayerActivity;
 import de.ostfalia.mobile.orgelhelfer.R;
@@ -33,6 +34,7 @@ import static de.ostfalia.mobile.orgelhelfer.model.Constants.START_PLAYING_RECOR
  */
 public class MidiPlayerService extends Service {
     public static boolean IS_SERVICE_RUNNING = false;
+    public static boolean IS_RECORDING_PLAYING = false;
     private final String LOG_TAG = MidiPlayerService.class.getSimpleName();
 
     @Nullable
@@ -60,39 +62,59 @@ public class MidiPlayerService extends Service {
 
             IS_SERVICE_RUNNING = true;
         } else if (intent.getAction().equals(
-                Constants.STOP_PLAYING_RECORDING)) {
+                Constants.STOP_MAIN_ACTION)) {
             Log.i(LOG_TAG, "Received Stop Foreground Intent");
             IS_SERVICE_RUNNING = false;
+            IS_RECORDING_PLAYING = false;
             stopForeground(true);
             stopSelf();
+        } else if (intent.getAction().equals(
+                Constants.STOP_PLAYING_RECORDING)) {
+            IS_RECORDING_PLAYING = false;
+            Log.i(LOG_TAG, "Received Stop Playing Intent");
         } else if (intent.getAction().equals(START_PLAYING_RECORDING)) {
-            Log.d(LOG_TAG, "Start Playing the Recording");
-            long startingTimestamp = PlayerActivity.recording.getStartingTimestamp();
-            final MidiRecording recording = PlayerActivity.recording;
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    List<MidiNote> notes = recording.getRecordingList();
-                    long lastTimestamp = 0;
-                    long nextTimestamp = 0;
-                    for (int i = 0; i < notes.size(); i++) {
-                        if (!(i + 1 < notes.size())) {
-                            MidiDataManager.getInstance().sendEvent(notes.get(i));
-                            return;
-                        }
+            if (!IS_RECORDING_PLAYING) {
 
-                        MidiDataManager.getInstance().sendEvent(notes.get(i));
-                        nextTimestamp = notes.get(i + 1).getTimestamp();
-                        lastTimestamp = notes.get(i).getTimestamp();
-                        try {
-                            Thread.sleep(nextTimestamp - lastTimestamp);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                            Log.d(LOG_TAG, "rip");
+
+                Log.d(LOG_TAG, "Start Playing the Recording");
+                final MidiRecording recording = PlayerActivity.recording;
+                IS_RECORDING_PLAYING = true;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        List<MidiNote> notes = recording.getRecordingList();
+                        long lastTimestamp = 0;
+                        long nextTimestamp = 0;
+                        for (int i = 0; i < notes.size(); i++) {
+                            if (MidiConnectionManager.getInstance().getInputPort() == null || !IS_RECORDING_PLAYING) {
+                                break;
+                            }
+                            if (!(i + 1 >= notes.size())) {
+                                MidiDataManager.getInstance().sendEvent(notes.get(i));
+                                break;
+                            }
+
+                            MidiDataManager.getInstance().sendEvent(notes.get(i));
+                            nextTimestamp = notes.get(i + 1).getTimestamp();
+                            lastTimestamp = notes.get(i).getTimestamp();
+                            long dif = nextTimestamp - lastTimestamp;
+                            Log.d(LOG_TAG, "Time until next Note: " + dif);
+                            if (dif > 0) {
+                                try {
+                                    Thread.sleep(dif);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                    Log.d(LOG_TAG, "rip");
+                                }
+                            }
+
                         }
                     }
-                }
-            });
+                }).start();
+            } else {
+                Log.d(LOG_TAG, "Recording already Playing !");
+            }
+
         } else {
             Log.d(LOG_TAG, "Unkown Intent: " + intent.getAction().toString());
         }
@@ -161,5 +183,6 @@ public class MidiPlayerService extends Service {
         super.onDestroy();
         Log.i(LOG_TAG, "In onDestroy");
         IS_SERVICE_RUNNING = false;
+        IS_RECORDING_PLAYING = false;
     }
 }

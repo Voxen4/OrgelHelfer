@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -37,11 +38,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.List;
 
 import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
+import de.ostfalia.mobile.orgelhelfer.model.Constants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
+import de.ostfalia.mobile.orgelhelfer.services.MidiPlayerService;
 
 import static android.widget.AdapterView.OnItemClickListener;
 import static android.widget.AdapterView.OnItemSelectedListener;
@@ -61,12 +63,12 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         setContentView(R.layout.activity_main);
         MidiManager midiManager = (MidiManager) getSystemService(MIDI_SERVICE);
         checkPermissions();
+        stopService();
 
         if (getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_MIDI)) {
             // do MIDI stuff
             // Setup a menu to select an input source.
             MidiConnectionManager.getInstance().setMidiManager(midiManager);
-            MidiConnectionManager.getInstance().setupDevices();
             MidiDataManager.getInstance().addOnMidiDataListener(this);
             MidiConnectionManager.getInstance().addOnDevicesChangedListener(this);
         } else {
@@ -89,8 +91,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
 
         spinner = findViewById(R.id.spinner);
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-        ArrayAdapter<CustomMidiDeviceInfo> arrayAdapter =
-                new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, MidiConnectionManager.getInstance().getDevices());
+        ArrayAdapter<CustomMidiDeviceInfo> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, getMidiDevices());
         spinner.setAdapter(arrayAdapter);
         spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
@@ -121,6 +122,12 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         super.onPause();
         MidiConnectionManager.getInstance().removeOnDevicesChangedListener(this);
         MidiDataManager.getInstance().removeOnMidiDataListener(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        stopService();
     }
 
 
@@ -206,11 +213,11 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
 
 
     @Override
-    public void onDevicesChanged(List<CustomMidiDeviceInfo> deviceInfo) {
+    public void onDevicesChanged() {
         Spinner spinner = findViewById(R.id.spinner);
         spinner.getAdapter();
         ArrayAdapter<CustomMidiDeviceInfo> arrayAdapter =
-                new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, deviceInfo);
+                new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, getMidiDevices());
         //Had to add this listeners cause apparently spinner doesn't keep a reference to the original List.
         spinner.setAdapter(arrayAdapter);
     }
@@ -304,6 +311,24 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
 
     }
 
+    public ArrayList<CustomMidiDeviceInfo> getMidiDevices() {
+        MidiManager midiManager = (MidiManager) getSystemService(MIDI_SERVICE);
+        ArrayList<CustomMidiDeviceInfo> list = new ArrayList<>();
+        if (midiManager == null) {
+            return list;
+        }
+        MidiDeviceInfo[] infos = midiManager.getDevices();
+        for (int i = 0; i < infos.length; i++) {
+            list.add(new CustomMidiDeviceInfo(infos[i]));
+        }
+        return list;
+    }
+
+    public void stopService() {
+        Intent stopServiceIntent = new Intent(getApplicationContext(), MidiPlayerService.class);
+        stopServiceIntent.setAction(Constants.STOP_MAIN_ACTION);
+        startService(stopServiceIntent);
+    }
 
     public JSONObject getJson() {
         return jsonData;

@@ -39,7 +39,7 @@ public class MidiRecording {
                     byte channel = (byte) obj.getInt("Channel");
                     byte pitch = (byte) obj.getInt("Pitch");
                     byte velocity = (byte) obj.getInt("Velocity");
-                    long timestamp = (byte) obj.getLong("Timestamp");
+                    long timestamp = obj.getLong("Timestamp");
                     MidiNote note = new MidiNote(type, channel, pitch, velocity, timestamp);
                     notes.add(note);
 
