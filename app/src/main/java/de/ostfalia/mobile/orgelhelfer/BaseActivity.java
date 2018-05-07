@@ -190,7 +190,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
             @Override
             public void run() {
                 Log.d(LOG_TAG, event.toString());
-                log.add(event);
+                log.add(0, event);
                 ((MidiEventArrayAdapter) listView.getAdapter()).notifyDataSetChanged();
                 if (recording) {
                     JSONObject jsonObject = new JSONObject();

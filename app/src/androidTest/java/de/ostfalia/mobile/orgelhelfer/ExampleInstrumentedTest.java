@@ -1,19 +1,15 @@
 package de.ostfalia.mobile.orgelhelfer;
 
 import android.content.Context;
-import android.os.Environment;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.widget.Button;
 import android.widget.ListView;
 
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.io.File;
 
 import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
 
@@ -45,7 +41,7 @@ public class ExampleInstrumentedTest {
         MidiNote[] texts = new MidiNote[100];
         for (int i = 0; i < 100; i++) {
             MidiNote note = MidiNote.MIDDLEC;
-            note.setTimestamp(note.getTimestamp() + 1);
+            note.setTimestamp(note.getTimestamp() + 1000);
             texts[i] = note;
             activity.onMidiData(note);
         }
@@ -80,25 +76,6 @@ public class ExampleInstrumentedTest {
 
     }
 
-    @Test
-    public void saveJsonTest() {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
-
-        BaseActivity activity = mActivityRule.getActivity();
-        Button recordButton = activity.findViewById(R.id.recordButton);
-        long timestamp = System.currentTimeMillis();
-        activity.startRecording(recordButton);
-        for (int i = 0; i < 100; i++) {
-            MidiNote note = MidiNote.MIDDLEC;
-            note.setTimestamp(note.getTimestamp() + 1);
-            activity.onMidiData(note);
-        }
-        activity.startRecording(recordButton);
-        String path = Environment.getExternalStorageDirectory().getPath() + File.separator + "OrgelHelfer" + File.separator + "track.json";
-        Assert.assertEquals(true, new File(path).exists());
-
-    }
 
 
 }
