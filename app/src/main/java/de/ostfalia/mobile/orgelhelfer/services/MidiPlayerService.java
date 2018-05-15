@@ -19,9 +19,9 @@ import android.util.Log;
 
 import java.util.List;
 
+import de.ostfalia.mobile.orgelhelfer.BaseActivity;
 import de.ostfalia.mobile.orgelhelfer.MidiConnectionManager;
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
-import de.ostfalia.mobile.orgelhelfer.PlayerActivity;
 import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.model.Constants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
@@ -77,7 +77,7 @@ public class MidiPlayerService extends Service {
 
 
                 Log.d(LOG_TAG, "Start Playing the Recording");
-                final MidiRecording recording = PlayerActivity.recording;
+                final MidiRecording recording = BaseActivity.midiRecording;
                 IS_RECORDING_PLAYING = true;
                 new Thread(new Runnable() {
                     @Override
@@ -89,7 +89,7 @@ public class MidiPlayerService extends Service {
                             if (MidiConnectionManager.getInstance().getInputPort() == null || !IS_RECORDING_PLAYING) {
                                 break;
                             }
-                            if (!(i + 1 >= notes.size())) {
+                            if (i + 1 >= notes.size()) {
                                 MidiDataManager.getInstance().sendEvent(notes.get(i));
                                 break;
                             }
@@ -126,7 +126,7 @@ public class MidiPlayerService extends Service {
     }
 
     private void showNotification(String channelid) {
-        Intent notificationIntent = new Intent(this, PlayerActivity.class);
+        Intent notificationIntent = new Intent(this, BaseActivity.class);
         notificationIntent.setAction(Constants.MAIN_ACTION);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK);

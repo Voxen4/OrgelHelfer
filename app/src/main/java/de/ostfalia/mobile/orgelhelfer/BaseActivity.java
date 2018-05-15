@@ -43,6 +43,7 @@ import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 import de.ostfalia.mobile.orgelhelfer.model.Constants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
+import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
 import de.ostfalia.mobile.orgelhelfer.services.MidiPlayerService;
 
 import static android.widget.AdapterView.OnItemClickListener;
@@ -51,9 +52,11 @@ import static android.widget.AdapterView.OnItemSelectedListener;
 public class BaseActivity extends AppCompatActivity implements MidiDataManager.OnMidiDataListener, MidiConnectionManager.OnDeviceChangedListener {
 
     private static final String LOG_TAG = BaseActivity.class.getSimpleName();
+    public static MidiRecording midiRecording;
     ArrayList<MidiNote> log = new ArrayList<>();
     private ListView listView;
     private Spinner spinner;
+    private Button playButton;
     private boolean recording;
     private JSONObject jsonData;
 
@@ -63,7 +66,6 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         setContentView(R.layout.activity_main);
         MidiManager midiManager = (MidiManager) getSystemService(MIDI_SERVICE);
         checkPermissions();
-        stopService();
 
         if (getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_MIDI)) {
             // do MIDI stuff
@@ -106,6 +108,11 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
 
             }
         });
+
+        playButton = findViewById(R.id.playButton);
+        if (midiRecording != null) {
+            playButton.setEnabled(true);
+        }
     }
 
 
@@ -127,7 +134,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
     @Override
     public void onResume() {
         super.onResume();
-        stopService();
+        //stopService();
     }
 
 
@@ -286,8 +293,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
                 File file = new File(files[0]);
                 JSONObject jsonObject = null;
                 if (file.exists()) {
-                    try {
-                        BufferedReader reader = new BufferedReader(new FileReader(file));
+                    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                         StringBuilder jsonString = new StringBuilder();
                         while (reader.ready()) {
                             String line = reader.readLine();
@@ -301,9 +307,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
                         Log.d(LOG_TAG, "Error Loading Recording Wrong Json Format: " + e.toString());
                         e.printStackTrace();
                     }
-                    Intent intent = new Intent(BaseActivity.this, PlayerActivity.class);
-                    intent.putExtra("Song", jsonObject.toString());
-                    startActivity(intent);
+                    setRecording(jsonObject);
                 }
             }
         });
@@ -311,6 +315,48 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
 
     }
 
+    private void setRecording(JSONObject recordingJson) {
+        midiRecording = MidiRecording.createRecordingFromJson(recordingJson);
+        startPlayerService();
+        final Button playButton = findViewById(R.id.playButton);
+        playButton.setEnabled(true);
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!MidiPlayerService.IS_SERVICE_RUNNING) {
+                    startPlayerService();
+                }
+                if (MidiPlayerService.IS_RECORDING_PLAYING) {
+                    Intent stopIntent = new Intent(getApplicationContext(), MidiPlayerService.class);
+                    stopIntent.setAction(Constants.STOP_PLAYING_RECORDING);
+                    startService(stopIntent);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            playButton.setText("Play");
+                        }
+                    });
+                } else {
+                    Intent playIntent = new Intent(getApplicationContext(), MidiPlayerService.class);
+                    playIntent.setAction(Constants.START_PLAYING_RECORDING);
+                    startService(playIntent);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            playButton.setText("Stop");
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    public void startPlayerService() {
+        Intent startIntent = new Intent(BaseActivity.this, MidiPlayerService.class);
+        startIntent.setAction(Constants.MAIN_ACTION);
+        startService(startIntent);
+
+    }
     public ArrayList<CustomMidiDeviceInfo> getMidiDevices() {
         MidiManager midiManager = (MidiManager) getSystemService(MIDI_SERVICE);
         ArrayList<CustomMidiDeviceInfo> list = new ArrayList<>();

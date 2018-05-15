@@ -7,6 +7,17 @@
     tools:context=".BaseActivity">
 
     <Button
+        android:id="@+id/playButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:enabled="false"
+        android:text="Play"
+        app:layout_constraintStart_toEndOf="@+id/loadButton"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+    <Button
         android:id="@+id/loadButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -24,15 +24,11 @@ import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 public class MidiConnectionManager extends MidiManager.DeviceCallback implements MidiManager.OnDeviceOpenedListener {
     private static final MidiConnectionManager ourInstance = new MidiConnectionManager();
     private static final String LOG_TAG = MidiConnectionManager.class.getSimpleName();
+    private final MidiSender midiSender;
     private MidiOutputPort outputPort;
     private MidiInputPort inputPort;
     private MidiManager midiManager;
-    private final MidiSender midiSender;
     private ArrayList<OnDeviceChangedListener> listeners = new ArrayList<>();
-
-    public static MidiConnectionManager getInstance() {
-        return ourInstance;
-    }
 
     private MidiConnectionManager() {
         midiSender = new MidiSender() {
@@ -46,6 +42,10 @@ public class MidiConnectionManager extends MidiManager.DeviceCallback implements
                 MidiDataManager.getInstance().sender = null;
             }
         };
+    }
+
+    public static MidiConnectionManager getInstance() {
+        return ourInstance;
     }
 
     @Override
@@ -90,6 +90,7 @@ public class MidiConnectionManager extends MidiManager.DeviceCallback implements
     public void setMidiManager(MidiManager midiManager) {
         if(this.midiManager == null){
             this.midiManager = midiManager;
+            midiManager.registerDeviceCallback(this, new Handler(Looper.getMainLooper()));
         }
     }
 
@@ -103,11 +104,6 @@ public class MidiConnectionManager extends MidiManager.DeviceCallback implements
         listeners.remove(listener);
     }
 
-    public interface OnDeviceChangedListener {
-        void onDevicesChanged();
-    }
-
-
     public MidiInputPort getInputPort() {
         return inputPort;
     }
@@ -115,6 +111,10 @@ public class MidiConnectionManager extends MidiManager.DeviceCallback implements
     public void connectToDevice(CustomMidiDeviceInfo deviceInfo) {
         Log.d(LOG_TAG,"Connecting to device: "+ deviceInfo);
         midiManager.openDevice(deviceInfo.getDevice(), this, new Handler(Looper.getMainLooper()));
+    }
+
+    public interface OnDeviceChangedListener {
+        void onDevicesChanged();
     }
 
 }
