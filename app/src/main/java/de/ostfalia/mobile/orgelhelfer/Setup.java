@@ -13,7 +13,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class setup extends ListActivity {
+public class Setup extends ListActivity {
 
     private EditText et_dateipfad;
     private ImageButton btn_dateipfad;
