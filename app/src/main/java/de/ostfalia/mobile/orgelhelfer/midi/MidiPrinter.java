@@ -69,6 +69,10 @@ public class MidiPrinter {
                 break;
             case "ActiveSensing":
                 type = MidiConstants.MessageTypes.STATUS_ACTIVE_SENSING;
+                break;
+            case "Program":
+                type = MidiConstants.MessageTypes.STATUS_PROGRAM_CHANGE;
+                break;
         }
         if (type == null) {
             Log.d(LOG_TAG, "No MessageType Matching " + typeString + " found.");

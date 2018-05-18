@@ -11,7 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
+import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,9 +38,9 @@ public class ExampleInstrumentedTest {
     @Test
     public void textListView() throws InterruptedException {
         BaseActivity activity = mActivityRule.getActivity();
-        MidiNote[] texts = new MidiNote[100];
+        MidiEvent[] texts = new MidiEvent[100];
         for (int i = 0; i < 100; i++) {
-            MidiNote note = MidiNote.MIDDLEC;
+            MidiEvent note = MidiEvent.MIDDLEC;
             note.setTimestamp(note.getTimestamp() + 1000);
             texts[i] = note;
             activity.onMidiData(note);
@@ -55,9 +55,9 @@ public class ExampleInstrumentedTest {
     @Test
     public void testListViewOnClick() throws InterruptedException {
         BaseActivity activity = mActivityRule.getActivity();
-        MidiNote[] texts = new MidiNote[100];
+        MidiEvent[] texts = new MidiEvent[100];
         for (int i = 0; i < 100; i++) {
-            MidiNote note = MidiNote.MIDDLEC;
+            MidiEvent note = MidiEvent.MIDDLEC;
             note.setTimestamp(note.getTimestamp() + 1);
             texts[i] = note;
             activity.onMidiData(note);

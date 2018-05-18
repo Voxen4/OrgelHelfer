@@ -10,17 +10,17 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
+import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 
-public class MidiEventArrayAdapter extends ArrayAdapter<MidiNote> {
+public class MidiEventArrayAdapter extends ArrayAdapter<MidiEvent> {
     private static LayoutInflater inflater = null;
     private Activity activity;
-    private List<MidiNote> event;
+    private List<MidiEvent> event;
 
-    public MidiEventArrayAdapter(Activity activity, int textViewResourceId, List<MidiNote> _MidiNote) {
-        super(activity, textViewResourceId, _MidiNote);
+    public MidiEventArrayAdapter(Activity activity, int textViewResourceId, List<MidiEvent> _MidiEvent) {
+        super(activity, textViewResourceId, _MidiEvent);
         this.activity = activity;
-        this.event = _MidiNote;
+        this.event = _MidiEvent;
 
         inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -30,7 +30,7 @@ public class MidiEventArrayAdapter extends ArrayAdapter<MidiNote> {
         return event.size();
     }
 
-    public MidiNote getItem(int position) {
+    public MidiEvent getItem(int position) {
         return event.get(position);
     }
 

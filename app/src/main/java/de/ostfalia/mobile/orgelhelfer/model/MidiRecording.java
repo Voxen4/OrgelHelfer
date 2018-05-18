@@ -13,9 +13,9 @@ import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 public class MidiRecording {
     private static final String LOG_TAG = MidiRecording.class.getSimpleName();
     long startingTimestamp;
-    private List<MidiNote> recordingList = new ArrayList<>();
+    private List<MidiEvent> recordingList = new ArrayList<>();
 
-    public MidiRecording(List<MidiNote> events, long _startingTimestamp) {
+    public MidiRecording(List<MidiEvent> events, long _startingTimestamp) {
         recordingList = events;
         startingTimestamp = _startingTimestamp;
     }
@@ -26,7 +26,7 @@ public class MidiRecording {
 
     public static MidiRecording createRecordingFromJson(JSONObject jsonObject) {
         final String BASE_ID = "Note";
-        ArrayList<MidiNote> notes = new ArrayList<>();
+        ArrayList<MidiEvent> notes = new ArrayList<>();
         long time = 0;
         try {
             for (int i = 0; i < jsonObject.length(); i++) {
@@ -40,7 +40,7 @@ public class MidiRecording {
                     byte pitch = (byte) obj.getInt("Pitch");
                     byte velocity = (byte) obj.getInt("Velocity");
                     long timestamp = obj.getLong("Timestamp");
-                    MidiNote note = new MidiNote(type, channel, pitch, velocity, timestamp);
+                    MidiEvent note = new MidiEvent(type, channel, pitch, velocity, timestamp);
                     notes.add(note);
 
                 }
@@ -57,11 +57,11 @@ public class MidiRecording {
         return recording;
     }
 
-    public List<MidiNote> getRecordingList() {
+    public List<MidiEvent> getRecordingList() {
         return recordingList;
     }
 
-    public void setRecordingList(List<MidiNote> events) {
+    public void setRecordingList(List<MidiEvent> events) {
         this.recordingList = events;
     }
 

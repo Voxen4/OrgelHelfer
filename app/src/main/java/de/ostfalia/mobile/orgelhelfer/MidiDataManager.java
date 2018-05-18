@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiPrinter;
-import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
+import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 
 /**
  * Created by kellerm on 23.04.2018.
@@ -44,11 +44,11 @@ public class MidiDataManager {
     /**
      * Notifying Listeners for MidiData, the send Data is already formatted
      *
-     * @param midiNote
+     * @param midiEvent
      */
-    private void notifyDataListeners(MidiNote midiNote) {
+    private void notifyDataListeners(MidiEvent midiEvent) {
         for (int i = 0; i < listeners.size(); i++) {
-            listeners.get(i).onMidiData(midiNote);
+            listeners.get(i).onMidiData(midiEvent);
         }
     }
 
@@ -63,7 +63,7 @@ public class MidiDataManager {
     }
 
     //Input Port has to be opened first.
-    public void sendEvent(MidiNote event) {
+    public void sendEvent(MidiEvent event) {
         //TODO Create parseable Event
         MidiInputPort inputPort = MidiConnectionManager.getInstance().getInputPort();
         if (inputPort == null) return;
@@ -81,7 +81,7 @@ public class MidiDataManager {
 
 // post is non-blocking
         try {
-            Log.d(LOG_TAG,"Sending MidiNote: "+event.toString());
+            Log.d(LOG_TAG,"Sending MidiEvent: "+event.toString());
             inputPort.send(buffer, offset, numBytes);
         } catch (IOException e) {
             e.printStackTrace();
@@ -90,7 +90,7 @@ public class MidiDataManager {
     }
 
     public interface OnMidiDataListener {
-        void onMidiData(MidiNote event);
+        void onMidiData(MidiEvent event);
     }
 
     private final class Receiver extends MidiReceiver {
@@ -209,8 +209,8 @@ public class MidiDataManager {
             byte statusByte = data[sysExStartOffset];
             int status = statusByte & 0xFF;
             //TODO Hier gegebenenfalls die System Messages rausfiltern
-            if (MidiPrinter.getType(status) == MidiConstants.MessageTypes.STATUS_NOTE_ON) {
-                MidiNote temp = new MidiNote(MidiPrinter.getType(status).getType(), data[sysExStartOffset++], data[sysExStartOffset++], data[sysExStartOffset++]);
+            if (MidiPrinter.getType(status) != null) {
+                MidiEvent temp = new MidiEvent(MidiPrinter.getType(status).getType(), data[sysExStartOffset++], data[sysExStartOffset++], data[sysExStartOffset++]);
                 MidiDataManager.getInstance().notifyDataListeners(temp);
 
             }

@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 import de.ostfalia.mobile.orgelhelfer.model.Constants;
-import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
+import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
 import de.ostfalia.mobile.orgelhelfer.services.MidiPlayerService;
 
@@ -53,7 +53,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
 
     private static final String LOG_TAG = BaseActivity.class.getSimpleName();
     public static MidiRecording midiRecording;
-    ArrayList<MidiNote> log = new ArrayList<>();
+    ArrayList<MidiEvent> log = new ArrayList<>();
     private ListView listView;
     private Spinner spinner;
     private Button playButton;
@@ -85,7 +85,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
                     @Override
                     public void onItemClick(AdapterView<?> arg0, View view,
                                             int position, long id) {
-                        MidiNote event = (MidiNote) listView.getItemAtPosition(position);
+                        MidiEvent event = (MidiEvent) listView.getItemAtPosition(position);
                         MidiDataManager.getInstance().sendEvent(event);
                     }
                 }
@@ -192,7 +192,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
     }
 
     @Override
-    public void onMidiData(final MidiNote event) {
+    public void onMidiData(final MidiEvent event) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

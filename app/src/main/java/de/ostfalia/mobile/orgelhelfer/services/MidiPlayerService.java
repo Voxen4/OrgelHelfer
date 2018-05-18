@@ -24,7 +24,7 @@ import de.ostfalia.mobile.orgelhelfer.MidiConnectionManager;
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.model.Constants;
-import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
+import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
 
 import static de.ostfalia.mobile.orgelhelfer.model.Constants.START_PLAYING_RECORDING;
@@ -82,7 +82,7 @@ public class MidiPlayerService extends Service {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        List<MidiNote> notes = recording.getRecordingList();
+                        List<MidiEvent> notes = recording.getRecordingList();
                         long lastTimestamp = 0;
                         long nextTimestamp = 0;
                         for (int i = 0; i < notes.size(); i++) {

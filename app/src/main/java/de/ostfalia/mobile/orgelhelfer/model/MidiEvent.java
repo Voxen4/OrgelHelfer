@@ -1,6 +1,8 @@
 package de.ostfalia.mobile.orgelhelfer.model;
 
 
+import android.support.annotation.NonNull;
+
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 
 /**
@@ -8,8 +10,8 @@ import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
  * Class representing a interpreted MidiKey Event, contains The Key Pressed and the "strength"?
  */
 
-public class MidiNote {
-    public static MidiNote MIDDLEC = new MidiNote(MidiConstants.MessageTypes.STATUS_NOTE_ON.getType(), (byte) (0x90 + 0), (byte) 60, (byte) 127);
+public class MidiEvent implements Comparable<MidiEvent>{
+    public static MidiEvent MIDDLEC = new MidiEvent(MidiConstants.MessageTypes.STATUS_NOTE_ON.getType(), (byte) (0x90 + 0), (byte) 60, (byte) 127);
 
     private final byte mType;
     private byte channel; //MIDI channels 1-16 are encoded as 0-15.
@@ -19,7 +21,7 @@ public class MidiNote {
     //90 2D 1D: NoteOn(1, 45, 29)
 
 
-    public MidiNote(byte _mType, byte _channel, byte _pitch, byte _velocity) {
+    public MidiEvent(byte _mType, byte _channel, byte _pitch, byte _velocity) {
         mType = _mType;
         channel = _channel;
         pitch = _pitch;
@@ -27,12 +29,20 @@ public class MidiNote {
         timestamp = System.currentTimeMillis();
     }
 
-    public MidiNote(byte _mType, byte _channel, byte _pitch, byte _velocity, long _timestamp) {
+    public MidiEvent(byte _mType, byte _channel, byte _pitch, byte _velocity, long _timestamp) {
         mType = _mType;
         channel = _channel;
         pitch = _pitch;
         velocity = _velocity;
         timestamp = _timestamp;
+    }
+
+    public byte[] getRaw() {
+        byte[] raw = raw = new byte[3];
+        raw[0] = (byte) ((mType << 4) + channel);
+        raw[1] = pitch;
+        raw[2] = velocity;
+        return raw;
     }
 
     public byte getmType() {
@@ -63,5 +73,17 @@ public class MidiNote {
         return MidiConstants.MessageTypes.getTypeByByte(mType) + "(" + channel + "," + pitch + "," + velocity + "," + timestamp + ")";
     }
 
+    @Override
+    public int compareTo(@NonNull MidiEvent o) {
+        byte[] oRaw = o.getRaw();
+        for(int i = 0; i < getRaw().length; i++) {
+            if(oRaw[i] < this.getRaw()[i]) {
+                return 1;
+            } else if(oRaw[i] > this.getRaw()[i]) {
+                return -1;
+            }
+        }
+        return 0;
+    }
 }
 
