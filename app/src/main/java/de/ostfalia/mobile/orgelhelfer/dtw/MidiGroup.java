@@ -3,7 +3,6 @@ package de.ostfalia.mobile.orgelhelfer.dtw;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 
 /**
@@ -13,19 +12,19 @@ import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
  * @author Aaron
  *
  */
-public class MidiList implements Cloneable{
-	ArrayList<MidiEvent> events;
-	public MidiList() {
+public class MidiGroup implements Cloneable{
+	private ArrayList<MidiEvent> events;
+	public MidiGroup() {
 		events = new ArrayList<MidiEvent>();
 	}
 	
-	public MidiList(ArrayList<MidiEvent> events) {
+	public MidiGroup(ArrayList<MidiEvent> events) {
 		this.events = events;
 		Collections.sort(this.events);
 	}
 
 	/*@Deprecated
-	public MidiList(int...ints) {
+	public MidiGroup(int...ints) {
 		this.events = new ArrayList<MidiEvent>();
 		for(int i: ints) {
 			//Keine probedaten verfügbar
@@ -33,28 +32,47 @@ public class MidiList implements Cloneable{
 		}
 		Collections.sort(this.events);
 	}*/
-	
-	public boolean hasMidiOfType(byte type) {
+
+	/**
+	 * Gibt an, ob sich in dieser MidiGroup ein Element befindet, dass zurückgespielt werden soll.
+	 * @return true, falls midnestens ein Element existiert, dass zurückgespielt werden soll, und false falls keins existiert.
+	 */
+	public boolean hasSollZurueckgespieltWerden() {
 		for(MidiEvent event: events) {
-			if(event.getmType() == type) {
+			if(event.getSollZurueckspielenWerden()) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
-	public ArrayList<MidiEvent> getMidiOfType(byte type) {
-		ArrayList<MidiEvent> statusEvents = new ArrayList<MidiEvent>();
+
+	/**
+	 * Gibt alle Elemente als ArrayList<MidiEvent> zurück, die zurückgepsielt werden sollen.
+	 * @return : ArrayList<MidiEvent> mit der eigentschaft event.getSollZurueckspielenWerden() == true
+	 */
+	public ArrayList<MidiEvent> getSollZurueckgespieltWerden() {
+		ArrayList<MidiEvent> zurueckgespielteEvents = new ArrayList<MidiEvent>();
 		for(MidiEvent event: events) {
-			if(event.getmType() == type) {
-				statusEvents.add(event);
+			if(event.getSollZurueckspielenWerden()) {
+				zurueckgespielteEvents.add(event);
 			}
 		}
-		return statusEvents;
+		return zurueckgespielteEvents;
+	}
+
+	public ArrayList<MidiEvent> cutSollZurueckgespieltWerden() {
+		ArrayList<MidiEvent> zurueckgespielteEvents = new ArrayList<MidiEvent>();
+		for(MidiEvent event: events) {
+			if(event.getSollZurueckspielenWerden()) {
+				zurueckgespielteEvents.add(event);
+				events.remove(event);
+			}
+		}
+		return zurueckgespielteEvents;
 	}
 	
 	/**
-	 * F�gt der MidiList ein neues MidiEvent event hinzu.
+	 * F�gt der MidiGroup ein neues MidiEvent event hinzu.
 	 * Wenn schon ein identisches Element in der Liste vorhanden ist, wird es nicht hinzugef�gt.
 	 * Die Komplexit�t betr�gt O(log(n)) wobei n = events.size() ist.
 	 * @param event : Das hinzuf�gende Element
@@ -66,8 +84,8 @@ public class MidiList implements Cloneable{
 	}
 	
 	@SuppressWarnings("unchecked")
-	public MidiList clone() {
-		return new MidiList((ArrayList<MidiEvent>) events.clone());
+	public MidiGroup clone() {
+		return new MidiGroup((ArrayList<MidiEvent>) events.clone());
 	}
 	
 	public void clear() {
@@ -83,7 +101,7 @@ public class MidiList implements Cloneable{
 	 * @return |R| = (A U B) / A , wobei A und B Mengen von MidiEvents aus den Objekten der MidiListen sind.
 	 */
 	
-	public static float getDist(MidiList midiCache1, MidiList midiCache2) {
+	public static float getDist(MidiGroup midiCache1, MidiGroup midiCache2) {
 		float dist = 0;
 		for(MidiEvent eventA: midiCache1.events) {
 			if(Collections.binarySearch(midiCache2.events, eventA) < 0) {

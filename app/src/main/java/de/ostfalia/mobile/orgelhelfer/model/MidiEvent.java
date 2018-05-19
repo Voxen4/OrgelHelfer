@@ -37,12 +37,21 @@ public class MidiEvent implements Comparable<MidiEvent>{
         timestamp = _timestamp;
     }
 
-    public byte[] getRaw() {
+    private byte[] getRaw() {
         byte[] raw = raw = new byte[3];
         raw[0] = (byte) ((mType << 4) + channel);
         raw[1] = pitch;
         raw[2] = velocity;
         return raw;
+    }
+
+    /**
+     * TODO. Implementation. Hier muss entschieden werden ob das Event zurückgespielt werden soll oder nicht.
+     * Diese Methode gibt an, ob das Element zurückgespielt werden sollte. Ist nur wichtig für Elemente aus einer Aufnahme.
+     * @return : Wahheitswert ob das Element zurückgespielt werden soll
+     */
+    public boolean getSollZurueckspielenWerden() {
+        return false;
     }
 
     public byte getmType() {

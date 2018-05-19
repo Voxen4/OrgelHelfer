@@ -1,7 +1,10 @@
 package de.ostfalia.mobile.orgelhelfer.dtw;
 
+import android.util.SparseArray;
+
 import java.util.ArrayList;
-import java.util.HashMap;
+
+import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 
 /**
  * 
@@ -9,14 +12,14 @@ import java.util.HashMap;
  *
  */
 public class RecordSnippet {
-	ArrayList<MidiList> rec;
-	ArrayList<MidiList> currentSnippet;
+	private ArrayList<MidiGroup> rec;
+	private ArrayList<MidiGroup> currentSnippet;
 	int offset;
-	int snippetLength;
-	public RecordSnippet(ArrayList<MidiList> rec, int snippetLength) {
+	private int snippetLength;
+	RecordSnippet(ArrayList<MidiGroup> rec, int snippetLength) {
 		this.rec = rec;
 		this.snippetLength = snippetLength;
-		this.currentSnippet = new ArrayList<MidiList>();
+		this.currentSnippet = new ArrayList<>();
 		for(int i = 0; i < snippetLength && i < rec.size(); i++) {
 			currentSnippet.add(rec.get(i));
 		}
@@ -34,7 +37,7 @@ public class RecordSnippet {
 		return currentSnippet.size();
 	}
 	
-	public MidiList get(int index) {
+	public MidiGroup get(int index) {
 		return currentSnippet.get(index);
 	}
 	
@@ -45,5 +48,16 @@ public class RecordSnippet {
 			sb.append((char) 9);
 		}
 		return sb.toString();
+	}
+
+
+	public static SparseArray<ArrayList<MidiEvent>> cutOutZurueckspielEvents(ArrayList<MidiGroup> rec) {
+		SparseArray<ArrayList<MidiEvent>> ret = new SparseArray<>();
+		for(int i = rec.size() - 1; i >= 0; i--) {
+			if(rec.get(i).hasSollZurueckgespieltWerden()) {
+				ret.put(i, rec.get(i).cutSollZurueckgespieltWerden());
+			}
+		}
+		return ret;
 	}
 }

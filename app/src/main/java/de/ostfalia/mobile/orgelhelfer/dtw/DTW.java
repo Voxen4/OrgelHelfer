@@ -1,102 +1,128 @@
 package de.ostfalia.mobile.orgelhelfer.dtw;
 
 import android.util.Log;
+import android.util.SparseArray;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
-import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 
 /**
- * DTW Algorithmus.
+ * DTW-Algorithmus. Dieser Algorithmus berrechnet den Effizientesten Pfad zwischen zwei Folgen (in diesem Fall Folgen von MidiGroups).
+ * Eine MidiGroup besteht aus keinem, einem oder mehreren MidiEvents die innerhalb von THREADSLEEPTIME Millisekunden an den Algorithmus gegeben wurden.
  * @author Aaron
  *
  */
 public class DTW implements Runnable{
-	public static int STREAMBUFFERLENGTH = 20;
-	public static int RECORDINGSNIPPETLENGTH = 10;
-	public static int THREADSLEEPTIME = 100;
-	public static byte BEFEHLE = MidiConstants.MessageTypes.STATUS_CONTROL_CHANGE.getType();
+	private static final int STREAMBUFFERLENGTH = 20;
+	private static final int RECORDINGSNIPPETLENGTH = 10;
+	private static final int THREADSLEEPTIME = 100;
 
-	boolean running;
-	
-	StreamBuffer streamBuffer;
-	RecordSnippet recordSnippet;
-	HashMap<Integer, ArrayList<MidiEvent>> befehleHashMap;
-	float[][] matrix;
-	
-	public DTW(ArrayList<MidiList> rec) {
+	private StreamBuffer streamBuffer;
+	private RecordSnippet recordSnippet;
+	private float[][] matrix;
+	private SparseArray<ArrayList<MidiEvent>> befehleSparseArray;
+
+	private int lastMinIndex;
+	private int totalStreamedGroups;
+
+	public DTW(ArrayList<MidiGroup> rec) {
 		streamBuffer = new StreamBuffer(STREAMBUFFERLENGTH);
-		recordSnippet = new RecordSnippet(rec, RECORDINGSNIPPETLENGTH);
-		matrix = new float[STREAMBUFFERLENGTH][RECORDINGSNIPPETLENGTH];
-		befehleHashMap = new HashMap<Integer, ArrayList<MidiEvent>>();
+
+		//recordSnippet = new RecordSnippet(rec, RECORDINGSNIPPETLENGTH);
+		//matrix = new float[STREAMBUFFERLENGTH][RECORDINGSNIPPETLENGTH];
+
+		/*befehleSparseArray = new SparseArray<>();
 		for(int i = rec.size(); i >= 0; i--) {
-			if (rec.get(i).hasMidiOfType(BEFEHLE)) {
-				befehleHashMap.put(i, rec.get(i).getMidiOfType(BEFEHLE));
+			if (rec.get(i).hasSollZurueckgespieltWerden()) {
+				befehleSparseArray.put(i, rec.get(i).getSollZurueckgespieltWerden());
 				rec.remove(i);
 			}
-		}
+		}*/
+
+		befehleSparseArray = RecordSnippet.cutOutZurueckspielEvents(rec);
+		recordSnippet = new RecordSnippet(rec, RECORDINGSNIPPETLENGTH);
+		matrix = new float[STREAMBUFFERLENGTH][RECORDINGSNIPPETLENGTH];
 	}
-	
+
+	private boolean running;
 	public void stop() {
 		running = false;
 	}
 	
-	MidiList nextEvents = new MidiList();
+	private MidiGroup nextEvents = new MidiGroup();
 	public synchronized void addEvent(MidiEvent event) {
 		nextEvents.addEvent(event);
 	}
 	
-	private synchronized MidiList getNextEvents() {
-		MidiList ret = nextEvents.clone();
+	private synchronized MidiGroup getNextEvents() {
+		MidiGroup ret = nextEvents.clone();
 		nextEvents.clear();
 		return ret;
 	}
-	
-	int lastMinIndex;
-	int currentMinIndex;
-	int totalStreamedElements;
-	public void next() {
-		MidiList e = getNextEvents();
-		totalStreamedElements++;
+
+	/**
+	 * Aufruf dieser Methode Erfolgt ausschließlich über die run-Methode.
+	 * Berechnet die Matrix mit allen Events die zwisachen dem letzten Aufruf und jetzt durch die Methode addEvent() hinzugefügt wurden. (pushedEventGroup im folgenden)
+	 * Abfolge: 1. Berrechnung der Distanz zwischen dem pushedEventGroup und allen anderen EventGroups in einem Intervall um das jetzige  Minimum der Aufnahme.
+	 * 			2. Ermittlung des neuen Minimums.
+	 * 			3. Evtl. senden von Events über den MiniDataMamager zum Gerät.
+	 * 			4. Evtl. verschieben der Matrix nach Vorne in der Aufnahme, sodas dass letzte Minimum wieder an am Index RECORDINGSNIPPETLENGTH / 2 ist.
+	 */
+	private void next() {
+		MidiGroup e = getNextEvents();
+		totalStreamedGroups++;
 		streamBuffer.addElement(e);
+		//Distanz wird ermittelt.
 		for(int i = 0; i < recordSnippet.size(); i++) {
-			//matrix[streamBuffer.getCurrentIndex()][i] = Math.abs(e.getValue() - recordSnippet.getIndex(i).getValue()) + min(neighboursOf(streamBuffer.getCurrentIndex(),i));
-			matrix[streamBuffer.getCurrentIndex()][i] = MidiList.getDist(e, recordSnippet.get(i)) + min(neighboursOf(streamBuffer.getCurrentIndex(),i));
-			//matrix[streamBuffer.getCurrentIndex()][i] = Math.abs(e.getValue() - recordSnippet.getIndex(i).getValue());
+			matrix[streamBuffer.getCurrentIndex()][i] = MidiGroup.getDist(e, recordSnippet.get(i)) + min(neighboursOf(streamBuffer.getCurrentIndex(),i));
 		}
-		
-		if(totalStreamedElements > STREAMBUFFERLENGTH / 2) {
-			adjustSpread();
-		}
-		// Suche nach allen Befehlen die den Status BEFEHL haben zwischen dm letzten minimum und dem jetzigen Minimum
+		int currentMinIndex = getMinIndex(streamBuffer.getCurrentIndex());
+
+		//Sendet alle Events die aus solche Markiert sind die zwischen dem letzten Minimum und dem letzigen Minimum liegen an das Gerät.
 		int i = lastMinIndex;
 		int j = 0;
 		if(lastMinIndex < currentMinIndex) {
-			while (i != currentMinIndex && j <= recordSnippet.size()) {
-				if (befehleHashMap.get(i + j) != null) {
-					for (MidiEvent event : befehleHashMap.get(i + j)) {
+			while ((i + j) % recordSnippet.size() != (currentMinIndex + 1) % recordSnippet.size() && j <= recordSnippet.size()) {
+				if (befehleSparseArray.get(recordSnippet.offset + i + j) != null) {
+					for (MidiEvent event : befehleSparseArray.get(recordSnippet.offset + i + j)) {
 						MidiDataManager.getInstance().sendEvent(event);
 					}
-				}
-				j++;
-			}
-			lastMinIndex = currentMinIndex;
+				} j++;
+			} lastMinIndex = currentMinIndex;
 		}
 
+		//TODO: Hier gibts noch ein Problem: Wenn die Matrix nach unten (- deviation) verschoben wir? Was soll dann passieren bzw. wie kann ich das verhindern?
+		//if(totalStreamedGroups >= STREAMBUFFERLENGTH / 2 && Math.abs(currentMinIndex - STREAMBUFFERLENGTH / 2) >= STREAMBUFFERLENGTH / 4) {
+		if(totalStreamedGroups >= STREAMBUFFERLENGTH / 2 && currentMinIndex - STREAMBUFFERLENGTH / 2 >= STREAMBUFFERLENGTH / 4) {
+			deviateMatrix(currentMinIndex - STREAMBUFFERLENGTH / 2);
+			lastMinIndex -= currentMinIndex - STREAMBUFFERLENGTH / 2;
+			currentMinIndex -= currentMinIndex - STREAMBUFFERLENGTH / 2;
+		}
+
+		//Das Ende der Aufnahme wurde erreicht. Abbruch des Algorithmus.
+		//TODO: Es wird erst abgebrochen wenn das Minimum mut dem letzten Element aus der Aufnahme assoziiert wird. Dies ist aber kein Kriterium dass zwangsweise eintreten muss.
+		if(currentMinIndex >= recordSnippet.offset + currentMinIndex) {
+			this.stop();
+		}
 	}
-	
+
+	/**
+	 * Ermittelt alle Nachbarn des Objektes an Position P(x,y). Die "Nachbarn" eines Objektes ist das Objekt links, oberhalb und link-oberhalb des Objektes.
+	 * @param x : Die X-Index in der Matrix
+	 * @param y : Der Y-Index in der Matrix.
+	 * @return : alle nachbarn des Objektes
+	 */
 	private ArrayList<Float> neighboursOf(int x, int y) {
-		ArrayList<Float> neighbours = new ArrayList<Float>(4);
+		ArrayList<Float> neighbours = new ArrayList<>(4);
 		
 		if(x > 0 && x != streamBuffer.getCurrentIndex() + 1) {
 			neighbours.add(matrix[x - 1][y]);
 			if(y > 0) {
 				neighbours.add(matrix[x - 1][y - 1]);
 			}
-		} else if(x == 0 && totalStreamedElements > STREAMBUFFERLENGTH) {
+		} else if(x == 0 && totalStreamedGroups > STREAMBUFFERLENGTH) {
 			neighbours.add(matrix[matrix.length - 1][y]);
 			if(y > 0) {
 				neighbours.add(matrix[matrix.length - 1][y - 1]);
@@ -108,7 +134,12 @@ public class DTW implements Runnable{
 		}
 		return neighbours;
 	}
-	
+
+	/**
+	 * Ermittelt den Minimalen Index in der Spalte col. Gibt es mehrere Elemente mit dem selben Wert, wird das letzte genommen.
+	 * @param col : Die Spalte in der das Minimum ermittelt werden soll.
+	 * @return minIndex: Den Index (Y-Koordinate in Matrix) in der sich das Minimum befindet. es gilt: matrix[minIndex][col] ist das Minimum aller Elemente aus matrix[a][col]
+	 */
 	private int getMinIndex(int col) {
 		float value = Integer.MAX_VALUE;
 		int index = -1;
@@ -120,11 +151,12 @@ public class DTW implements Runnable{
 		}
 		return index;
 	}
-	
-	
-	
-	
-	
+
+	/**
+	 * Ermittelt das Minimum der Elemente aus der ArrayList List.
+	 * @param list : Die Liste die auf sein Minimum untersucht werden soll.
+	 * @return min: den niedrigsten Wert in der Liste list.
+	 */
 	private float min(ArrayList<Float> list) {
 		float min = Float.MAX_VALUE;
 		if(list.size() == 0) {
@@ -138,7 +170,10 @@ public class DTW implements Runnable{
 		}
 		return min;
 	}
-	
+
+	/**
+	 * Unused
+	 */
 	private void adjustSpread() {
 		float min = Integer.MAX_VALUE;
 		int minIndex = 0;
@@ -158,7 +193,11 @@ public class DTW implements Runnable{
 			deviateMatrix(deviation);
 		}
 	}
-	
+
+	/**
+	 * Verschiebt die Matrix um die deviation nach oben.
+	 * @param deviation : Eine positive Zahl um die die Matrix verschoben werden soll.
+	 */
 	private void deviateMatrix(int deviation) {
 		Log.d("DTW", "------------MATRIX VERSCHOBEN UM: " + deviation + "------------");
 		Log.d("DTW", this.toString());
@@ -169,7 +208,7 @@ public class DTW implements Runnable{
 				newMatrix[i][n] = matrix[i][n + deviation];
 			}
 			for(int n = recordSnippet.size() - deviation; n < recordSnippet.size(); n++) {
-				newMatrix[i][n] = MidiList.getDist(streamBuffer.get(i), recordSnippet.get(n)) + min(neighboursOf(i,n));
+				newMatrix[i][n] = MidiGroup.getDist(streamBuffer.get(i), recordSnippet.get(n)) + min(neighboursOf(i,n));
 			}
 		}
 		this.matrix = newMatrix;
@@ -177,7 +216,8 @@ public class DTW implements Runnable{
 		Log.d("DTW",this.toString());
 		Log.d("DTW","-----------------------------------------------------------------");
 	}
-	
+
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append((char) 9);
