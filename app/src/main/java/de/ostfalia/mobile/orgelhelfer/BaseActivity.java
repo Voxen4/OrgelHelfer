@@ -40,7 +40,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 
 import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
-import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 import de.ostfalia.mobile.orgelhelfer.model.Constants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
@@ -134,6 +133,8 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
     @Override
     public void onResume() {
         super.onResume();
+        MidiDataManager.getInstance().addOnMidiDataListener(this);
+        MidiConnectionManager.getInstance().addOnDevicesChangedListener(this);
         //stopService();
     }
 
@@ -200,14 +201,8 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
                 log.add(0, event);
                 ((MidiEventArrayAdapter) listView.getAdapter()).notifyDataSetChanged();
                 if (recording) {
-                    JSONObject jsonObject = new JSONObject();
                     try {
-                        jsonObject.put("Type", MidiConstants.MessageTypes.getTypeByByte(event.getmType()));
-                        jsonObject.put("Channel", event.getChannel());
-                        jsonObject.put("Pitch", event.getPitch());
-                        jsonObject.put("Velocity", event.getVelocity());
-                        jsonObject.put("Timestamp", event.getTimestamp());
-                        jsonData.put("Note" + jsonData.length(), jsonObject);
+                        jsonData.put("Event" + jsonData.length(), event.toJsonObject());
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Log.d(LOG_TAG, "Error while adding Note to JSON");

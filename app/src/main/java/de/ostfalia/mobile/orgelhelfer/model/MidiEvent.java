@@ -3,6 +3,11 @@ package de.ostfalia.mobile.orgelhelfer.model;
 
 import android.support.annotation.NonNull;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Arrays;
+
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 
 /**
@@ -11,38 +16,28 @@ import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
  */
 
 public class MidiEvent implements Comparable<MidiEvent>{
-    public static MidiEvent MIDDLEC = new MidiEvent(MidiConstants.MessageTypes.STATUS_NOTE_ON.getType(), (byte) (0x90 + 0), (byte) 60, (byte) 127);
 
     private final byte mType;
-    private byte channel; //MIDI channels 1-16 are encoded as 0-15.
-    private byte pitch;
-    private byte velocity; // between 0 and 127
+    private final byte[] data;
     private long timestamp;
     //90 2D 1D: NoteOn(1, 45, 29)
 
 
-    public MidiEvent(byte _mType, byte _channel, byte _pitch, byte _velocity) {
+    public MidiEvent(byte _mType, byte[] _data) {
         mType = _mType;
-        channel = _channel;
-        pitch = _pitch;
-        velocity = _velocity;
+        data = _data;
         timestamp = System.currentTimeMillis();
     }
 
-    public MidiEvent(byte _mType, byte _channel, byte _pitch, byte _velocity, long _timestamp) {
+    public MidiEvent(byte _mType, byte[] _data, long _timestamp) {
         mType = _mType;
-        channel = _channel;
-        pitch = _pitch;
-        velocity = _velocity;
+        data = _data;
         timestamp = _timestamp;
     }
 
-    private byte[] getRaw() {
-        byte[] raw = raw = new byte[3];
-        raw[0] = (byte) ((mType << 4) + channel);
-        raw[1] = pitch;
-        raw[2] = velocity;
-        return raw;
+
+    public byte[] getRaw() {
+        return data;
     }
 
     /**
@@ -58,18 +53,6 @@ public class MidiEvent implements Comparable<MidiEvent>{
         return mType;
     }
 
-    public byte getChannel() {
-        return channel;
-    }
-
-    public byte getPitch() {
-        return pitch;
-    }
-
-    public byte getVelocity() {
-        return velocity;
-    }
-
     public long getTimestamp() {
         return timestamp;
     }
@@ -79,7 +62,7 @@ public class MidiEvent implements Comparable<MidiEvent>{
     }
 
     public String toString() {
-        return MidiConstants.MessageTypes.getTypeByByte(mType) + "(" + channel + "," + pitch + "," + velocity + "," + timestamp + ")";
+        return MidiConstants.MessageTypes.getTypeByByte(mType) + "(" + Arrays.toString(data) + timestamp + ")";
     }
 
     @Override
@@ -93,6 +76,14 @@ public class MidiEvent implements Comparable<MidiEvent>{
             }
         }
         return 0;
+    }
+
+    public JSONObject toJsonObject() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("Type", MidiConstants.MessageTypes.getTypeByByte(getmType()));
+        jsonObject.put("Data", Arrays.toString(getRaw()));
+        jsonObject.put("Timestamp", getTimestamp());
+        return jsonObject;
     }
 }
 
