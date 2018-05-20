@@ -28,6 +28,7 @@
         <service android:name=".services.MidiPlayerService" />
 
         <activity android:name=".Playlist" />
+        <activity android:name=".Setup" />
         <activity android:name=".BaseActivity"></activity>
     </application>
 
