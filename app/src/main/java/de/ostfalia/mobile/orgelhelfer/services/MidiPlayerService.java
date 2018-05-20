@@ -145,13 +145,13 @@ public class MidiPlayerService extends Service {
                 stopIntent, 0);
 
         Bitmap icon = BitmapFactory.decodeResource(getResources(),
-                R.mipmap.orgelhelper_icon);
+                R.mipmap.icon);
 
         Notification notification = new NotificationCompat.Builder(this, channelid)
                 .setContentTitle("Midi Music Player")
                 .setTicker("TutorialsFace Music Player")
                 .setContentText("Playing Midi Recording")
-                .setSmallIcon(R.mipmap.orgelhelper_icon)
+                .setSmallIcon(R.mipmap.icon)
                 .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)

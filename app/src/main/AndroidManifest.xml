@@ -16,7 +16,7 @@
         android:roundIcon="@mipmap/icon_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".BaseActivity">
+        <activity android:name=".Start">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,7 +27,8 @@
 
         <service android:name=".services.MidiPlayerService" />
 
-        <activity android:name=".Playlist"></activity>
+        <activity android:name=".Playlist" />
+        <activity android:name=".BaseActivity"></activity>
     </application>
 
 </manifest>
