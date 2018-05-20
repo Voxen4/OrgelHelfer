@@ -1,43 +1,51 @@
 package de.ostfalia.mobile.orgelhelfer.model;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 
 /**
- * Created by kellerm on 23.04.2018.
- * Class representing a interpreted MidiKey Event, contains The Key Pressed and the "strength"?
+ * Created by kellerm on 20.05.2018.
  */
 
-public class MidiNote {
-    public static MidiNote MIDDLEC = new MidiNote(MidiConstants.MessageTypes.STATUS_NOTE_ON.getType(), (byte) (0x90 + 0), (byte) 60, (byte) 127);
-
-    private final byte mType;
+public class MidiNote extends MidiEvent {
+    public static MidiEvent MIDDLEC = new MidiNote(MidiConstants.MessageTypes.STATUS_NOTE_ON.getType(), (byte) (0x90 + 0), (byte) 60, (byte) 127);
     private byte channel; //MIDI channels 1-16 are encoded as 0-15.
     private byte pitch;
     private byte velocity; // between 0 and 127
-    private long timestamp;
-    //90 2D 1D: NoteOn(1, 45, 29)
 
+    public MidiNote(byte _mType, byte[] data) {
+        super(_mType, data);
+        int sysExStartOffset = 0;
+        channel = data[sysExStartOffset++];
+        pitch = data[sysExStartOffset++];
+        velocity = data[sysExStartOffset++];
+
+    }
+
+    public MidiNote(byte _mType, byte[] data, long timestamp) {
+        super(_mType, data, timestamp);
+        int sysExStartOffset = 0;
+        channel = data[sysExStartOffset++];
+        pitch = data[sysExStartOffset++];
+        velocity = data[sysExStartOffset++];
+    }
 
     public MidiNote(byte _mType, byte _channel, byte _pitch, byte _velocity) {
-        mType = _mType;
+        super(_mType, new byte[]{_channel, _pitch, _velocity});
         channel = _channel;
         pitch = _pitch;
         velocity = _velocity;
-        timestamp = System.currentTimeMillis();
     }
 
     public MidiNote(byte _mType, byte _channel, byte _pitch, byte _velocity, long _timestamp) {
-        mType = _mType;
+        super(_mType, new byte[]{_channel, _pitch, _velocity}, _timestamp);
         channel = _channel;
         pitch = _pitch;
         velocity = _velocity;
-        timestamp = _timestamp;
     }
 
-    public byte getmType() {
-        return mType;
-    }
 
     public byte getChannel() {
         return channel;
@@ -51,17 +59,19 @@ public class MidiNote {
         return velocity;
     }
 
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long _timestamp) {
-        timestamp = _timestamp;
-    }
-
+    @Override
     public String toString() {
-        return MidiConstants.MessageTypes.getTypeByByte(mType) + "(" + channel + "," + pitch + "," + velocity + "," + timestamp + ")";
+        return MidiConstants.MessageTypes.getTypeByByte(super.getmType()) + "(" + channel + "," + pitch + "," + velocity + "," + super.getTimestamp() + ")";
     }
 
+    @Override
+    public JSONObject toJsonObject() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("Type", MidiConstants.MessageTypes.getTypeByByte(super.getmType()));
+        jsonObject.put("Channel", getChannel());
+        jsonObject.put("Pitch", getPitch());
+        jsonObject.put("Velocity", getVelocity());
+        jsonObject.put("Timestamp", getTimestamp());
+        return jsonObject;
+    }
 }
-

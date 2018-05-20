@@ -9,24 +9,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
+import de.ostfalia.mobile.orgelhelfer.midi.MidiPrinter;
 
 public class MidiRecording {
     private static final String LOG_TAG = MidiRecording.class.getSimpleName();
     long startingTimestamp;
-    private List<MidiNote> recordingList = new ArrayList<>();
+    private List<MidiEvent> recordingList = new ArrayList<>();
 
-    public MidiRecording(List<MidiNote> events, long _startingTimestamp) {
+    public MidiRecording(List<MidiEvent> events, long _startingTimestamp) {
         recordingList = events;
         startingTimestamp = _startingTimestamp;
     }
 
-    public MidiRecording() {
-
-    }
-
     public static MidiRecording createRecordingFromJson(JSONObject jsonObject) {
-        final String BASE_ID = "Note";
-        ArrayList<MidiNote> notes = new ArrayList<>();
+        final String BASE_ID = "Event";
+        ArrayList<MidiEvent> notes = new ArrayList<>();
         long time = 0;
         try {
             for (int i = 0; i < jsonObject.length(); i++) {
@@ -34,14 +31,33 @@ public class MidiRecording {
                     JSONObject obj = null;
 
                     obj = (JSONObject) jsonObject.get(BASE_ID + i);
+                    MidiEvent event = null;
+                    byte type;
+                    long timestamp;
+                    switch (MidiPrinter.getType(obj.getInt("Type"))) {
 
-                    byte type = MidiConstants.MessageTypes.valueOf(obj.getString("Type")).getType();
-                    byte channel = (byte) obj.getInt("Channel");
-                    byte pitch = (byte) obj.getInt("Pitch");
-                    byte velocity = (byte) obj.getInt("Velocity");
-                    long timestamp = obj.getLong("Timestamp");
-                    MidiNote note = new MidiNote(type, channel, pitch, velocity, timestamp);
-                    notes.add(note);
+                        case STATUS_NOTE_ON:
+                            type = MidiConstants.MessageTypes.valueOf(obj.getString("Type")).getType();
+                            byte channel = (byte) obj.getInt("Channel");
+                            byte pitch = (byte) obj.getInt("Pitch");
+                            byte velocity = (byte) obj.getInt("Velocity");
+                            timestamp = obj.getLong("Timestamp");
+                            event = new MidiNote(type, channel, pitch, velocity, timestamp);
+                            break;
+                        case STATUS_PROGRAM_CHANGE:
+                            type = MidiConstants.MessageTypes.valueOf(obj.getString("Type")).getType();
+                            String response = obj.getString("Data");
+                            String[] byteValues = response.substring(1, response.length() - 1).split(",");
+                            byte[] bytes = new byte[byteValues.length];
+
+                            for (int j = 0, len = bytes.length; j < len; j++) {//ayy
+                                bytes[j] = Byte.parseByte(byteValues[j].trim());
+                            }
+                            timestamp = obj.getLong("Timestamp");
+                            event = new MidiProgram(type, bytes, timestamp);
+                            break;
+                    }
+                    notes.add(event);
 
                 }
 
@@ -57,11 +73,11 @@ public class MidiRecording {
         return recording;
     }
 
-    public List<MidiNote> getRecordingList() {
+    public List<MidiEvent> getRecordingList() {
         return recordingList;
     }
 
-    public void setRecordingList(List<MidiNote> events) {
+    public void setRecordingList(List<MidiEvent> events) {
         this.recordingList = events;
     }
 

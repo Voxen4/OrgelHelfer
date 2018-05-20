@@ -40,9 +40,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 
 import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
-import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 import de.ostfalia.mobile.orgelhelfer.model.Constants;
-import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
+import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
 import de.ostfalia.mobile.orgelhelfer.services.MidiPlayerService;
 
@@ -53,7 +52,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
 
     private static final String LOG_TAG = BaseActivity.class.getSimpleName();
     public static MidiRecording midiRecording;
-    ArrayList<MidiNote> log = new ArrayList<>();
+    ArrayList<MidiEvent> log = new ArrayList<>();
     private ListView listView;
     private Spinner spinner;
     private Button playButton;
@@ -85,7 +84,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
                     @Override
                     public void onItemClick(AdapterView<?> arg0, View view,
                                             int position, long id) {
-                        MidiNote event = (MidiNote) listView.getItemAtPosition(position);
+                        MidiEvent event = (MidiEvent) listView.getItemAtPosition(position);
                         MidiDataManager.getInstance().sendEvent(event);
                     }
                 }
@@ -134,6 +133,8 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
     @Override
     public void onResume() {
         super.onResume();
+        MidiDataManager.getInstance().addOnMidiDataListener(this);
+        MidiConnectionManager.getInstance().addOnDevicesChangedListener(this);
         //stopService();
     }
 
@@ -192,7 +193,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
     }
 
     @Override
-    public void onMidiData(final MidiNote event) {
+    public void onMidiData(final MidiEvent event) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -200,14 +201,8 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
                 log.add(0, event);
                 ((MidiEventArrayAdapter) listView.getAdapter()).notifyDataSetChanged();
                 if (recording) {
-                    JSONObject jsonObject = new JSONObject();
                     try {
-                        jsonObject.put("Type", MidiConstants.MessageTypes.getTypeByByte(event.getmType()));
-                        jsonObject.put("Channel", event.getChannel());
-                        jsonObject.put("Pitch", event.getPitch());
-                        jsonObject.put("Velocity", event.getVelocity());
-                        jsonObject.put("Timestamp", event.getTimestamp());
-                        jsonData.put("Note" + jsonData.length(), jsonObject);
+                        jsonData.put("Event" + jsonData.length(), event.toJsonObject());
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Log.d(LOG_TAG, "Error while adding Note to JSON");

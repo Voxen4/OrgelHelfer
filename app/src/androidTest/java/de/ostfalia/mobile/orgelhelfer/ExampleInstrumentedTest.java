@@ -11,7 +11,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
+import de.ostfalia.mobile.orgelhelfer.model.MidiProgram;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,9 +40,15 @@ public class ExampleInstrumentedTest {
     @Test
     public void textListView() throws InterruptedException {
         BaseActivity activity = mActivityRule.getActivity();
-        MidiNote[] texts = new MidiNote[100];
-        for (int i = 0; i < 100; i++) {
-            MidiNote note = MidiNote.MIDDLEC;
+        MidiEvent[] texts = new MidiEvent[200];
+        for (int i = 0; i < texts.length / 2; i++) {
+            MidiEvent note = MidiNote.MIDDLEC;
+            note.setTimestamp(note.getTimestamp() + 1000);
+            texts[i] = note;
+            activity.onMidiData(note);
+        }
+        for (int i = 100; i < texts.length; i++) {
+            MidiEvent note = MidiProgram.ProgramTest;
             note.setTimestamp(note.getTimestamp() + 1000);
             texts[i] = note;
             activity.onMidiData(note);
@@ -55,9 +63,9 @@ public class ExampleInstrumentedTest {
     @Test
     public void testListViewOnClick() throws InterruptedException {
         BaseActivity activity = mActivityRule.getActivity();
-        MidiNote[] texts = new MidiNote[100];
+        MidiEvent[] texts = new MidiEvent[100];
         for (int i = 0; i < 100; i++) {
-            MidiNote note = MidiNote.MIDDLEC;
+            MidiEvent note = MidiNote.MIDDLEC;
             note.setTimestamp(note.getTimestamp() + 1);
             texts[i] = note;
             activity.onMidiData(note);
