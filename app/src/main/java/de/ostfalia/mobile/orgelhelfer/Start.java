@@ -41,5 +41,12 @@ public class Start extends AppCompatActivity {
                 startActivity(new Intent(v.getContext(), Playlist.class));
             }
         });
+
+        genre.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(v.getContext(), KategorieActivity.class));
+            }
+        });
     }
 }
