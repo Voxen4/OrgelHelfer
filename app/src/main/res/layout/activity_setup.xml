@@ -174,4 +174,11 @@
         android:layout_alignEnd="@+id/textView9"
         android:text="Anzeige Geschwindigkeit" />
 
+    <ListView
+        android:id="@id/android:list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:drawSelectorOnTop="false"
+        android:scrollbars="vertical" />
+
 </RelativeLayout>

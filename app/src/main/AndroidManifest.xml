@@ -15,7 +15,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/icon_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:name=".db.App">
         <activity android:name=".Start">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,13 +24,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PlayerActivity" />
+        <activity android:name=".Setup" />
+        <activity android:name=".Playlist" />
 
         <service android:name=".services.MidiPlayerService" />
+        <activity android:name=".BaseActivity" />
+        <activity android:name=".KategorieActivity" />
 
-        <activity android:name=".Playlist" />
-        <activity android:name=".Setup" />
-        <activity android:name=".BaseActivity"></activity>
     </application>
 
 </manifest>
