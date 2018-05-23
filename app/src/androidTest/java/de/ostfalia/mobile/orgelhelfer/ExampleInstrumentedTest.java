@@ -11,6 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import de.ostfalia.mobile.orgelhelfer.activitys.BaseActivity;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
 import de.ostfalia.mobile.orgelhelfer.model.MidiProgram;

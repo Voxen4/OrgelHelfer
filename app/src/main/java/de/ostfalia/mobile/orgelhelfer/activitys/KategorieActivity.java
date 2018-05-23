@@ -1,22 +1,18 @@
-package de.ostfalia.mobile.orgelhelfer;
+package de.ostfalia.mobile.orgelhelfer.activitys;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
 
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter;
@@ -31,6 +27,7 @@ import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractSwipeableItemView
 import java.util.ArrayList;
 import java.util.List;
 
+import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.db.App;
 import de.ostfalia.mobile.orgelhelfer.db.Kategorie;
 import de.ostfalia.mobile.orgelhelfer.db.MyDatabase;
@@ -53,7 +50,7 @@ public class KategorieActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.rc);
         Button addItem = findViewById(R.id.addItem);
 
-        // Setup swiping feature and RecyclerView
+        // SetupActivity swiping feature and RecyclerView
         RecyclerViewSwipeManager swipeMgr = new RecyclerViewSwipeManager();
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

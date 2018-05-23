@@ -1,9 +1,11 @@
-package de.ostfalia.mobile.orgelhelfer;
+package de.ostfalia.mobile.orgelhelfer.activitys;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
-public class Playlist extends AppCompatActivity {
+import de.ostfalia.mobile.orgelhelfer.R;
+
+public class PlaylistActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

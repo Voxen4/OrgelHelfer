@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background"
-    tools:context="de.ostfalia.mobile.orgelhelfer.Setup">
+    tools:context="de.ostfalia.mobile.orgelhelfer.activitys.SetupActivity">
 
     <TextView
         android:id="@+id/musik"
