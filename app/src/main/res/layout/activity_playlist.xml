@@ -3,17 +3,81 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@drawable/background"
     android:layout_height="match_parent"
     tools:context="de.ostfalia.mobile.orgelhelfer.Playlist">
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/erstellen"
+        android:layout_width="188dp"
+        android:layout_height="45dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="22dp"
+        android:background="@drawable/buttonbackground"
+        android:text="Playlist erstellen"
+        android:textColor="@color/cardview_dark_background"
+        tools:layout_editor_absoluteX="109dp"
+        tools:layout_editor_absoluteY="259dp" />
+
+    <Button
+        android:id="@+id/loeschen"
+        android:layout_width="189dp"
+        android:layout_height="45dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="80dp"
+        android:background="@drawable/buttonbackground"
+        android:text="Playlist löschen"
+        android:textColor="@color/cardview_dark_background"
+        tools:layout_editor_absoluteX="109dp"
+        tools:layout_editor_absoluteY="259dp" />
+
+    <Button
+        android:id="@+id/songauswahl"
+        android:layout_width="172dp"
+        android:layout_height="45dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="165dp"
+        android:background="@drawable/buttonbackground"
+        android:text="Playlist auswählen"
+        android:textColor="@color/cardview_dark_background"
+        tools:layout_editor_absoluteX="109dp"
+        tools:layout_editor_absoluteY="259dp" />
+
+    <ImageView
+        android:id="@+id/playbutton"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="63dp"
+        app:srcCompat="@mipmap/playbutton" />
+
+    <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="215dp"
-        android:text="Playlist erstellen"
-        tools:layout_editor_absoluteX="109dp"
-        tools:layout_editor_absoluteY="259dp" />
+        android:layout_marginTop="228dp"
+        android:text="Anzeige aktueller Song" />
+
+    <ImageView
+        android:id="@+id/previousbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="78dp"
+        android:layout_toStartOf="@+id/textView"
+        app:srcCompat="@mipmap/previousbutton" />
+
+    <ImageView
+        android:id="@+id/nextbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/previousbutton"
+        android:layout_toEndOf="@+id/textView"
+        app:srcCompat="@mipmap/nextbutton" />
 </RelativeLayout>
