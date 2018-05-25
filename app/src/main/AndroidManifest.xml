@@ -17,19 +17,20 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:name=".db.App">
-        <activity android:name=".Start">
+        <activity android:name=".activitys.StartActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Setup" />
-        <activity android:name=".Playlist" />
+        <activity android:name=".activitys.SetupActivity" />
+        <activity android:name=".activitys.PlaylistActivity" />
 
         <service android:name=".services.MidiPlayerService" />
-        <activity android:name=".BaseActivity" />
-        <activity android:name=".KategorieActivity" />
+
+        <activity android:name=".activitys.BaseActivity" />
+        <activity android:name=".activitys.KategorieActivity" />
 
     </application>
 

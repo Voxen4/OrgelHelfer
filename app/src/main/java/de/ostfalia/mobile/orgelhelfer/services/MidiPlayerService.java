@@ -19,10 +19,10 @@ import android.util.Log;
 
 import java.util.List;
 
-import de.ostfalia.mobile.orgelhelfer.BaseActivity;
 import de.ostfalia.mobile.orgelhelfer.MidiConnectionManager;
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.R;
+import de.ostfalia.mobile.orgelhelfer.activitys.BaseActivity;
 import de.ostfalia.mobile.orgelhelfer.model.Constants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;

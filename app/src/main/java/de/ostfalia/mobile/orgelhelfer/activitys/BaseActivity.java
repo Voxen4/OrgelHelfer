@@ -1,6 +1,5 @@
-package de.ostfalia.mobile.orgelhelfer;
+package de.ostfalia.mobile.orgelhelfer.activitys;
 
-import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,8 +7,6 @@ import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -39,6 +36,10 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 
+import de.ostfalia.mobile.orgelhelfer.MidiConnectionManager;
+import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
+import de.ostfalia.mobile.orgelhelfer.MidiEventArrayAdapter;
+import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 import de.ostfalia.mobile.orgelhelfer.model.Constants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
@@ -52,7 +53,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
 
     private static final String LOG_TAG = BaseActivity.class.getSimpleName();
     public static MidiRecording midiRecording;
-    ArrayList<MidiEvent> log = new ArrayList<>();
+    public ArrayList<MidiEvent> log = new ArrayList<>();
     private ListView listView;
     private Spinner spinner;
     private Button playButton;
@@ -64,17 +65,13 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         MidiManager midiManager = (MidiManager) getSystemService(MIDI_SERVICE);
-        checkPermissions();
 
         if (getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_MIDI)) {
             // do MIDI stuff
-            // Setup a menu to select an input source.
+            // SetupActivity a menu to select an input source.
             MidiConnectionManager.getInstance().setMidiManager(midiManager);
             MidiDataManager.getInstance().addOnMidiDataListener(this);
             MidiConnectionManager.getInstance().addOnDevicesChangedListener(this);
-        } else {
-            Log.d(LOG_TAG, "NO MIDI Support for this Device");
-            noMidiSupportAlert(false).show();
         }
         listView = findViewById(R.id.list);
         ArrayAdapter adapter = new MidiEventArrayAdapter(this, R.layout.simple_list_item_slim, log);
@@ -115,14 +112,6 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
     }
 
 
-    public AlertDialog noMidiSupportAlert(boolean cancelable) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setCancelable(cancelable);
-        builder.setTitle(R.string.no_midi_service_title);
-        builder.setMessage(R.string.no_midi_service);
-        return builder.create();
-    }
-
     @Override
     public void onPause() {
         super.onPause();
@@ -138,29 +127,6 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         //stopService();
     }
 
-
-    private void checkPermissions() {
-        // Here, thisActivity is the current activity
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Permission is not granted
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            } else {
-                // No explanation needed; request the permission
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        } else {
-            // Permission has already been granted
-        }
-
-    }
 
     public void startRecording(View view) {
         final Button recordButton = (Button) view;
@@ -352,6 +318,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         startService(startIntent);
 
     }
+
     public ArrayList<CustomMidiDeviceInfo> getMidiDevices() {
         MidiManager midiManager = (MidiManager) getSystemService(MIDI_SERVICE);
         ArrayList<CustomMidiDeviceInfo> list = new ArrayList<>();
@@ -365,13 +332,4 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         return list;
     }
 
-    public void stopService() {
-        Intent stopServiceIntent = new Intent(getApplicationContext(), MidiPlayerService.class);
-        stopServiceIntent.setAction(Constants.STOP_MAIN_ACTION);
-        startService(stopServiceIntent);
-    }
-
-    public JSONObject getJson() {
-        return jsonData;
-    }
 }

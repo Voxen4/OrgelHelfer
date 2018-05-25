@@ -1,11 +1,15 @@
-package de.ostfalia.mobile.orgelhelfer;
+package de.ostfalia.mobile.orgelhelfer.activitys;
 
+import android.app.ListActivity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
-public class Setup extends AppCompatActivity {
+import de.ostfalia.mobile.orgelhelfer.R;
+
+
+public class SetupActivity extends ListActivity {
 
     private EditText et_dateipfad;
     private ImageButton btn_dateipfad;
@@ -18,7 +22,12 @@ public class Setup extends AppCompatActivity {
         et_dateipfad = (findViewById(R.id.dateipfad));
         btn_dateipfad = (findViewById(R.id.ib_dateipfad));
 
+        btn_dateipfad.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+            }
+        });
 
 
 

@@ -1,22 +1,18 @@
-package de.ostfalia.mobile.orgelhelfer;
+package de.ostfalia.mobile.orgelhelfer.activitys;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
 
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter;
@@ -28,9 +24,11 @@ import com.h6ah4i.android.widget.advrecyclerview.swipeable.annotation.SwipeableI
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.annotation.SwipeableItemResults;
 import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractSwipeableItemViewHolder;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
+import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.db.App;
 import de.ostfalia.mobile.orgelhelfer.db.Kategorie;
 import de.ostfalia.mobile.orgelhelfer.db.MyDatabase;
@@ -41,6 +39,8 @@ public class KategorieActivity extends AppCompatActivity {
     private static long counter = 0;
     private MyAdapter adapter = null;
     public List<Kategorie> data;
+    private Kategorie temp;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,21 +53,43 @@ public class KategorieActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.rc);
         Button addItem = findViewById(R.id.addItem);
 
-        // Setup swiping feature and RecyclerView
+
         RecyclerViewSwipeManager swipeMgr = new RecyclerViewSwipeManager();
+
+
+        //Swipe zum Löschen der Daten!
+        swipeMgr.setOnItemSwipeEventListener(new RecyclerViewSwipeManager.OnItemSwipeEventListener() {
+            public void onItemSwipeStarted(int position) {
+            }
+
+            public void onItemSwipeFinished(int position, int result, int afterSwipeReaction) {
+
+                if (result == 4 || result == 2) {
+                    temp = data.get(position);
+                    data.remove(position);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            database.kategorieDao().delete(temp);
+                        }
+                    }).start();
+                }
+
+            }
+        });
+
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         adapter = new MyAdapter();
 
-
+        // Erstellen der Datenbank bei Öffnen der Activity
         new Thread(new Runnable() {
             @Override
             public void run() {
                 database = App.get().getDB();
                 data = database.kategorieDao().getAll();
-                for(int i = 0;i < data.size();i++)
-                {
+                for (int i = 0; i < data.size(); i++) {
                     adapter.createnewItem(data.get(i).getName());
                 }
 
@@ -78,10 +100,9 @@ public class KategorieActivity extends AppCompatActivity {
         recyclerView.setAdapter(swipeMgr.createWrappedAdapter(adapter));
 
 
-
-
         swipeMgr.attachRecyclerView(recyclerView);
 
+        // Hinzufügen der Items in das Recyclerview
         addItem.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
@@ -102,9 +123,11 @@ public class KategorieActivity extends AppCompatActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                Kategorie temp = new Kategorie(edittext.getText().toString());
+                                temp = new Kategorie(edittext.getText().toString());
                                 data.add(temp);
                                 database.kategorieDao().insertOne(temp);
+                                // Nochmal holen der Datanbank, damit Einträge direkt gelöscht werden können!
+                                data = database.kategorieDao().getAll();
                             }
                         }).start();
 
@@ -123,9 +146,6 @@ public class KategorieActivity extends AppCompatActivity {
             }
         });
     }
-
-
-
 
 
     static class MyItem {
@@ -231,6 +251,7 @@ public class KategorieActivity extends AppCompatActivity {
             protected void onPerformAction() {
                 adapter.mItems.remove(position);
                 adapter.notifyItemRemoved(position);
+
             }
         }
     }
