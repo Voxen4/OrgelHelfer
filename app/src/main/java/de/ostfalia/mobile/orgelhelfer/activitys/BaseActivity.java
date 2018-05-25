@@ -35,11 +35,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.List;
 
 import de.ostfalia.mobile.orgelhelfer.MidiConnectionManager;
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.MidiEventArrayAdapter;
 import de.ostfalia.mobile.orgelhelfer.R;
+import de.ostfalia.mobile.orgelhelfer.db.App;
+import de.ostfalia.mobile.orgelhelfer.db.Kategorie;
 import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 import de.ostfalia.mobile.orgelhelfer.model.Constants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
@@ -54,6 +57,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
     private static final String LOG_TAG = BaseActivity.class.getSimpleName();
     public static MidiRecording midiRecording;
     public ArrayList<MidiEvent> log = new ArrayList<>();
+    List<Kategorie> kategorie;
     private ListView listView;
     private Spinner spinner;
     private Button playButton;
@@ -109,6 +113,13 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         if (midiRecording != null) {
             playButton.setEnabled(true);
         }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                kategorie = App.INSTANCE.getDB().kategorieDao().getAll();
+            }
+        }).start();
+
     }
 
 
@@ -143,6 +154,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
             jsonData = new JSONObject();
             try {
                 jsonData.put("recording", ((Long) System.currentTimeMillis()).toString());
+                jsonData.put("Genre", "Other");
             } catch (JSONException e) {
                 e.printStackTrace();
                 Log.d(LOG_TAG, "Error while switching recording " + e.toString());
@@ -220,6 +232,23 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         dialogBuilder.setView(dialogView);
 
         final EditText edt = dialogView.findViewById(R.id.edit1);
+        final Spinner spinner = dialogView.findViewById(R.id.spinner1);
+        spinner.setAdapter(new ArrayAdapter<Kategorie>(getApplicationContext(), R.layout.simple_list_item_slim, kategorie));
+        spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    jsonData.put("Genre", spinner.getItemAtPosition(position));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.d(LOG_TAG, e.toString());
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
 
         dialogBuilder.setTitle("Choose a Filename");
         dialogBuilder.setMessage(getString(R.string.external_folder_saving));
