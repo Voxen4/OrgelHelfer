@@ -1,37 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/lib/android.support.v7.widget.GridLayout"
-    xmlns:grid="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="0.5dp"
-    app:columnCount="2"
-    app:rowCount="3"
-    app:useDefaultMargins="true">
+    android:background="@drawable/background"
 
+    android:gravity="center_vertical"
+    android:orientation="vertical">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/kategorie"
+        android:layout_width="wrap_content"
 
-        <Button
-            android:id="@+id/addItem"
-            android:layout_width="133dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="44dp"
-            android:text="Hinzufügen" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Kategorien"
 
-    </RelativeLayout>
+        android:textSize="24sp" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rc"
         android:layout_width="match_parent"
-        android:layout_height="424dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true" />
+        android:textAlignment="center"
+        android:layout_height="400dp"
 
-</FrameLayout>
+        android:layout_gravity="center" />
+
+    <Button
+        android:id="@+id/addItem"
+        android:layout_width="133dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="44dp"
+        android:text="Hinzufügen" />
+
+
+</LinearLayout>
