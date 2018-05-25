@@ -6,7 +6,7 @@ import android.arch.persistence.room.Room;
 public class App extends Application {
 
     public static App INSTANCE;
-    private static final String DATABASE_NAME = "MyDatabase";
+    private static final String DATABASE_NAME = "Orgellager";
 
     private MyDatabase database;
 
@@ -19,7 +19,7 @@ public class App extends Application {
         super.onCreate();
 
         // create database
-        database = Room.databaseBuilder(getApplicationContext(), MyDatabase.class, "test")
+        database = Room.databaseBuilder(getApplicationContext(), MyDatabase.class, DATABASE_NAME)
                 .build();
 
         INSTANCE = this;

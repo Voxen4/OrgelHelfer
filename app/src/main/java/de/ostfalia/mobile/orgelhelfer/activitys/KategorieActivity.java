@@ -92,8 +92,6 @@ public class KategorieActivity extends AppCompatActivity {
                 for (int i = 0; i < data.size(); i++) {
                     adapter.createnewItem(data.get(i).getName());
                 }
-
-
             }
         }).start();
 
