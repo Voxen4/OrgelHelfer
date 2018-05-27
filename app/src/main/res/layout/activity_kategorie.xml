@@ -10,12 +10,12 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/playlist"
+        android:id="@+id/kategorie"
         android:layout_width="wrap_content"
 
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Playlists"
+        android:text="Kategorien"
 
         android:textSize="24sp" />
 

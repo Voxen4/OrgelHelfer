@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/background"
     android:orientation="vertical"
-    tools:context="de.ostfalia.mobile.orgelhelfer.Start">
+    tools:context="de.ostfalia.mobile.orgelhelfer.activitys.StartActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -18,9 +18,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="ORGELHELFER"
-            android:textColor="@color/cardview_light_background"
-            android:textSize="34sp" />
+            android:text="Orgelhelfer"
+            android:textAlignment="center"
+            android:textAllCaps="true"
+            android:textSize="30sp"
+            android:textStyle="bold" />
 
 
     </RelativeLayout>

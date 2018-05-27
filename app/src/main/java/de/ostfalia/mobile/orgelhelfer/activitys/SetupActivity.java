@@ -1,15 +1,15 @@
-package de.ostfalia.mobile.orgelhelfer;
+package de.ostfalia.mobile.orgelhelfer.activitys;
 
 import android.app.ListActivity;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import de.ostfalia.mobile.orgelhelfer.R;
 
 
-public class Setup extends ListActivity {
+public class SetupActivity extends ListActivity {
 
     private EditText et_dateipfad;
     private ImageButton btn_dateipfad;
