@@ -2,6 +2,7 @@ package de.ostfalia.mobile.orgelhelfer.db;
 
 import android.app.Application;
 import android.arch.persistence.room.Room;
+import android.arch.persistence.room.migration.Migration;
 
 public class App extends Application {
 
@@ -18,8 +19,12 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
+
+
+
         // create database
         database = Room.databaseBuilder(getApplicationContext(), MyDatabase.class, DATABASE_NAME)
+                .addMigrations(MyDatabase.MIGRATION_1_2)
                 .build();
 
         INSTANCE = this;
