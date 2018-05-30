@@ -34,7 +34,7 @@ public class MidiRecording {
                     MidiEvent event = null;
                     byte type;
                     long timestamp;
-                    switch (MidiPrinter.getType(obj.getInt("Type"))) {
+                    switch (MidiConstants.MessageTypes.valueOf((obj.getString("Type")))) {
 
                         case STATUS_NOTE_ON:
                             type = MidiConstants.MessageTypes.valueOf(obj.getString("Type")).getType();

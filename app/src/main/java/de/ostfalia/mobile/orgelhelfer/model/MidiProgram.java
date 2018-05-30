@@ -7,7 +7,7 @@ import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
  */
 
 public class MidiProgram extends MidiEvent {
-    public static MidiProgram ProgramTest = new MidiProgram(MidiConstants.MessageTypes.STATUS_PROGRAM_CHANGE.getType(), new byte[]{(byte) 0, (byte) 0});
+    public static MidiProgram ProgramTest = new MidiProgram(MidiConstants.MessageTypes.STATUS_CONTROL_CHANGE.getType(), new byte[]{MidiConstants.MessageTypes.STATUS_CONTROL_CHANGE.getType(), (byte) 0b01011101});
 
     public MidiProgram(byte _mType, byte[] _data) {
         super(_mType, _data);

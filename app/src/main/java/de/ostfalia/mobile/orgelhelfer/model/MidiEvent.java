@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.util.Arrays;
 
+import de.ostfalia.mobile.orgelhelfer.dtw.DtwComparable;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 
 /**
@@ -15,7 +16,7 @@ import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
  * Class representing a interpreted MidiKey Event, contains The Key Pressed and the "strength"?
  */
 
-public class MidiEvent implements Comparable<MidiEvent>{
+public class MidiEvent implements DtwComparable<MidiEvent>{
 
     private final byte mType;
     private final byte[] data;
@@ -57,6 +58,15 @@ public class MidiEvent implements Comparable<MidiEvent>{
         return timestamp;
     }
 
+    @Override
+    public boolean listenTo() {
+        if(this instanceof MidiNote) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void setTimestamp(long _timestamp) {
         timestamp = _timestamp;
     }
@@ -66,14 +76,19 @@ public class MidiEvent implements Comparable<MidiEvent>{
     }
 
     @Override
+    public int dtwCompareTo(MidiEvent o) {
+        if(mType == o.mType && data[1] == o.data[1]) {
+            return 0;
+        }
+        return 1;
+    }
+
+    @Override
     public int compareTo(@NonNull MidiEvent o) {
-        byte[] oRaw = o.getRaw();
-        for(int i = 0; i < getRaw().length; i++) {
-            if(oRaw[i] < this.getRaw()[i]) {
-                return 1;
-            } else if(oRaw[i] > this.getRaw()[i]) {
-                return -1;
-            }
+        if(o.getTimestamp() < this.getTimestamp()) {
+            return 1;
+        } else if(o.getTimestamp() > this.getTimestamp()) {
+            return -1;
         }
         return 0;
     }

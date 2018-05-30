@@ -68,7 +68,7 @@ public class MidiDataManager {
         //TODO Is every Event solved by sending it like that ?
         MidiInputPort inputPort = MidiConnectionManager.getInstance().getInputPort();
         if (inputPort == null) return;
-        Log.d(LOG_TAG,"Sending Event "+event.toString());
+        //Log.d(LOG_TAG,"Sending Event "+event.toString());
         byte[] buffer = new byte[32];
         int numBytes = 0;
         byte[] raw = event.getRaw();

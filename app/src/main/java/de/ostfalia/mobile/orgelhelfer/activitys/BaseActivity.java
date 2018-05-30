@@ -278,7 +278,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
 
     private void setRecording(JSONObject recordingJson) {
         midiRecording = MidiRecording.createRecordingFromJson(recordingJson);
-        startPlayerService();
+        //startPlayerService();
         final Button playButton = findViewById(R.id.playButton);
         playButton.setEnabled(true);
         playButton.setOnClickListener(new View.OnClickListener() {

@@ -23,6 +23,7 @@ import de.ostfalia.mobile.orgelhelfer.MidiConnectionManager;
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.activitys.BaseActivity;
+import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 import de.ostfalia.mobile.orgelhelfer.model.Constants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
@@ -50,6 +51,9 @@ public class MidiPlayerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null || intent.getAction() == null) {
+            return START_STICKY;
+        }
         if (intent.getAction().equals(Constants.MAIN_ACTION)) {
             Log.d(LOG_TAG, "Received Start Foreground Intent ");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -94,7 +98,9 @@ public class MidiPlayerService extends Service {
                                 break;
                             }
 
-                            MidiDataManager.getInstance().sendEvent(notes.get(i));
+                            if (!(notes.get(i).getmType() == MidiConstants.MessageTypes.STATUS_PROGRAM_CHANGE.getType())) {
+                                MidiDataManager.getInstance().sendEvent(notes.get(i));
+                            }
                             nextTimestamp = notes.get(i + 1).getTimestamp();
                             lastTimestamp = notes.get(i).getTimestamp();
                             long dif = nextTimestamp - lastTimestamp;
@@ -110,7 +116,9 @@ public class MidiPlayerService extends Service {
 
                         }
                     }
-                }).start();
+                }).
+
+                        start();
             } else {
                 Log.d(LOG_TAG, "Recording already Playing !");
             }

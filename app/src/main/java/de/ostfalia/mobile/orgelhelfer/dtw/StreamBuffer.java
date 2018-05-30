@@ -8,16 +8,18 @@ package de.ostfalia.mobile.orgelhelfer.dtw;
  * @author Aaron
  *
  */
-public class StreamBuffer {
+public class StreamBuffer<E> {
 	private int currentElement = -1;
 	private int size;
-	private MidiGroup[] buffer;
-	StreamBuffer(int bufferLength) {
+	private E[] buffer;
+	
+	@SuppressWarnings("unchecked")
+	StreamBuffer(final int bufferLength) {
 		size = 0;
-		buffer = new MidiGroup[bufferLength];
+		buffer = (E[]) new Object[bufferLength];
 	}
 	
-	public void addElement(MidiGroup element) {
+	public void addElement(E element) {
 		size++;
 		if(size > buffer.length) {
 			size = buffer.length;
@@ -30,11 +32,18 @@ public class StreamBuffer {
 		return currentElement;
 	}
 	
-	public MidiGroup get(int index) {
+	public int getLastIndex() {
+		if(size > buffer.length) {
+			return (currentElement + 1) % buffer.length;
+		}
+		return 0;
+	}
+	
+	public E get(int index) {
 		return buffer[index];
 	}
 	
-	public int size() {
+	public int getCurrentBufferSize() {
 		return size;
 	}
 	
