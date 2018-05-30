@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -43,6 +44,7 @@ public class KategorieActivity extends AppCompatActivity {
     private Kategorie temp;
 
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
@@ -52,7 +54,9 @@ public class KategorieActivity extends AppCompatActivity {
         setContentView(R.layout.activity_kategorie);
 
         RecyclerView recyclerView = findViewById(R.id.rc);
-        Button addItem = findViewById(R.id.addItem);
+        ImageView addItem = findViewById(R.id.kategorieHinzufügen);
+
+
 
 
         RecyclerViewSwipeManager swipeMgr = new RecyclerViewSwipeManager();
@@ -165,6 +169,9 @@ public class KategorieActivity extends AppCompatActivity {
             super(itemView);
             containerView = itemView.findViewById(R.id.container);
             textView = itemView.findViewById(android.R.id.text1);
+            textView.setTextSize(25);
+
+            textView.setTextAppearance(R.style.fontForNotificationLandingPage);
         }
 
         @Override

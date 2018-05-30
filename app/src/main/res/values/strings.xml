@@ -8,4 +8,11 @@
     <string name="stop_recording">Stop Recording</string>
     <string name="external_folder_saving">"Recording will be saved on the SDCard in the &appname;
         Folder"</string>
+    <string name="title_activity_navi">navi</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
 </resources>

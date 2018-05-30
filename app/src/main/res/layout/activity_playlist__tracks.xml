@@ -1,50 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-
-    android:id="@+id/container"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/background"
-
     android:gravity="center_vertical"
     android:orientation="vertical">
 
-
     <TextView
-        android:id="@+id/playlist"
-        android:layout_width="match_parent"
+        android:id="@+id/playlistName"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:gravity="center_horizontal"
+        android:text="PlaylistName"
         android:fontFamily="sans-serif-smallcaps"
         android:textColor="@color/cardview_light_background"
-        android:text="Playlists"
-
-        android:background="@drawable/back"
-
-        android:textSize="35sp" />
-
+        android:textSize="24sp"
+         />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rc"
         android:layout_width="match_parent"
         android:layout_height="331dp"
-        android:layout_alignParentBottom="true"
 
+        android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:layout_gravity="center"
         android:layout_marginBottom="101dp"
         android:textAlignment="center" />
 
     <ImageView
-        android:id="@+id/playlistHinzufügen"
+        android:id="@+id/trackHinzufügen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_alignBottom="@+id/erstellen"
         android:layout_centerHorizontal="true"
         app:srcCompat="@android:drawable/ic_input_add" />
-
-
 </LinearLayout>

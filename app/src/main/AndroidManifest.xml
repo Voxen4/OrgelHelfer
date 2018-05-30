@@ -41,7 +41,7 @@
         <activity
             android:name=".activitys.KategorieActivity"
             android:screenOrientation="portrait" />
-
+        <activity android:name=".db.Playlist_Tracks"></activity>
     </application>
 
 </manifest>
