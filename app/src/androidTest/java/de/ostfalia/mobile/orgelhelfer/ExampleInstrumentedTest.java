@@ -11,7 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import de.ostfalia.mobile.orgelhelfer.activitys.BaseActivity;
+import de.ostfalia.mobile.orgelhelfer.activitys.ConnectActivity;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
 import de.ostfalia.mobile.orgelhelfer.model.MidiProgram;
@@ -27,8 +27,8 @@ import static org.junit.Assert.assertEquals;
 public class ExampleInstrumentedTest {
 
     @Rule
-    public ActivityTestRule<BaseActivity> mActivityRule =
-            new ActivityTestRule(BaseActivity.class);
+    public ActivityTestRule<ConnectActivity> mActivityRule =
+            new ActivityTestRule(ConnectActivity.class);
 
     @Test
     public void useAppContext() {
@@ -40,7 +40,7 @@ public class ExampleInstrumentedTest {
 
     @Test
     public void textListView() throws InterruptedException {
-        BaseActivity activity = mActivityRule.getActivity();
+        ConnectActivity activity = mActivityRule.getActivity();
         MidiEvent[] texts = new MidiEvent[200];
         for (int i = 0; i < texts.length / 2; i++) {
             MidiEvent note = MidiNote.MIDDLEC;
@@ -63,7 +63,7 @@ public class ExampleInstrumentedTest {
 
     @Test
     public void testListViewOnClick() throws InterruptedException {
-        BaseActivity activity = mActivityRule.getActivity();
+        ConnectActivity activity = mActivityRule.getActivity();
         MidiEvent[] texts = new MidiEvent[100];
         for (int i = 0; i < 100; i++) {
             MidiEvent note = MidiNote.MIDDLEC;

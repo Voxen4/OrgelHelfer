@@ -13,13 +13,12 @@ import de.ostfalia.mobile.orgelhelfer.model.MidiProgram;
 
 public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
 	private static final String LOG_TAG = EventScheduler.class.getSimpleName();
+	public boolean started = false;
 	ArrayList<E> events;
 	int currentIndex;
 	long time;
 	Thread t = new Thread(this);
-	
 	boolean running = false;
-	public boolean started = false;
 	
 	public EventScheduler(ArrayList<E> events) {
 		t = new Thread(this);
@@ -66,7 +65,7 @@ public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
 				systemDeltaTime = System.nanoTime() / 1000000 - systemMilliTime;	
 				//System.out.println("Thread selpt for " + systemDeltaTime);
 				time = time + systemDeltaTime;
-				while(currentEvent != null && time > currentEvent.getTimestamp() - 20) {
+				while (currentEvent != null && time > currentEvent.getTimestamp() - 50) {
 					sendEvent(currentEvent);
 					if(it.hasNext()) {
 						currentEvent = it.next();
@@ -88,8 +87,8 @@ public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
 	private void sendEvent(E currentEvent) {
 		if(currentEvent instanceof MidiEvent){
 			MidiEvent e = (MidiEvent) currentEvent;
-			MidiDataManager.getInstance().sendEvent(MidiProgram.ProgramTest);
-
+			//MidiDataManager.getInstance().sendEvent(MidiProgram.ProgramTest);
+			MidiDataManager.getInstance().sendEvent(e);
 			//Log.d(LOG_TAG,"Sending Event: " + e.toString());
 		}
 	}

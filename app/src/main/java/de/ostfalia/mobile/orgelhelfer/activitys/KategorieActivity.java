@@ -33,12 +33,12 @@ import de.ostfalia.mobile.orgelhelfer.db.App;
 import de.ostfalia.mobile.orgelhelfer.db.Kategorie;
 import de.ostfalia.mobile.orgelhelfer.db.MyDatabase;
 
-public class KategorieActivity extends AppCompatActivity {
+public class KategorieActivity extends BaseActivity {
 
-    private MyDatabase database;
     private static long counter = 0;
-    private MyAdapter adapter = null;
     public List<Kategorie> data;
+    private MyDatabase database;
+    private MyAdapter adapter = null;
     private Kategorie temp;
 
 
@@ -113,11 +113,11 @@ public class KategorieActivity extends AppCompatActivity {
                 edittext.setInputType(1);
 
 
-                alert.setTitle("Neue Kategorie");
+                alert.setTitle(R.string.neue_kategorie);
 
                 alert.setView(edittext);
 
-                alert.setPositiveButton("Hinzufügen", new DialogInterface.OnClickListener() {
+                alert.setPositiveButton(R.string.hinzufügen, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         adapter.createnewItem(edittext.getText().toString());
                         new Thread(new Runnable() {
@@ -134,7 +134,7 @@ public class KategorieActivity extends AppCompatActivity {
                     }
                 });
 
-                alert.setNegativeButton("Verwerfen", new DialogInterface.OnClickListener() {
+                alert.setNegativeButton(R.string.verwerfen, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         // what ever you want to do with No option.
                     }
@@ -175,9 +175,6 @@ public class KategorieActivity extends AppCompatActivity {
     }
 
     static class MyAdapter extends RecyclerView.Adapter<MyViewHolder> implements SwipeableItemAdapter<MyViewHolder> {
-        interface Swipeable extends SwipeableItemConstants {
-        }
-
         List<MyItem> mItems;
 
         public MyAdapter() {
@@ -234,6 +231,9 @@ public class KategorieActivity extends AppCompatActivity {
 
         @Override
         public void onSetSwipeBackground(MyViewHolder holder, int position, @SwipeableItemDrawableTypes int type) {
+        }
+
+        interface Swipeable extends SwipeableItemConstants {
         }
 
         static class MySwipeResultActionRemoveItem extends SwipeResultActionRemoveItem {

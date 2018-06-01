@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import de.ostfalia.mobile.orgelhelfer.R;
 
-public class PlaylistActivity extends AppCompatActivity {
+public class PlaylistActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

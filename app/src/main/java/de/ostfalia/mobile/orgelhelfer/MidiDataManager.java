@@ -116,7 +116,7 @@ public class MidiDataManager {
          * @throws IOException
          */
         @Override
-        public void onSend(byte[] data, int offset, int count, long timestamp) {
+        public synchronized void onSend(byte[] data, int offset, int count, long timestamp) {
             int sysExStartOffset = (mInSysEx ? offset : -1);
 
             //    Log.d("MIDIFRAMER_DATA", Arrays.toString(data) + "," + offset + "," + count + "," + timestamp);
@@ -158,6 +158,9 @@ public class MidiDataManager {
                     }
                 } else { // data byte
                     if (!mInSysEx) {
+                        if (mCount == mBuffer.length) {
+                            Log.d(LOG_TAG, "buggy");
+                        }
                         mBuffer[mCount++] = currentByte;
                         if (--mNeeded == 0) {
                             if (mRunningStatus != 0) {

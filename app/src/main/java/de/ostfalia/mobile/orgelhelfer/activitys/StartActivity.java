@@ -15,7 +15,7 @@ import android.view.View;
 import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.dtw.Dtw;
 
-public class StartActivity extends AppCompatActivity {
+public class StartActivity extends BaseActivity {
 
     private static final String LOG_TAG = StartActivity.class.getSimpleName();
     private CardView aufnahme, abspielen, genre, einstellungen, playlist;
@@ -34,15 +34,15 @@ public class StartActivity extends AppCompatActivity {
         aufnahme.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(v.getContext(), BaseActivity.class));
+                startActivity(new Intent(v.getContext(), ConnectActivity.class));
             }
         });
 
         abspielen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(BaseActivity.midiRecording != null) {
-                    Dtw dtw = Dtw.constructDTW(BaseActivity.midiRecording.getRecordingList());
+                if (ConnectActivity.midiRecording != null) {
+                    Dtw dtw = Dtw.constructDTW(ConnectActivity.midiRecording.getRecordingList());
                 }
             }
         });
