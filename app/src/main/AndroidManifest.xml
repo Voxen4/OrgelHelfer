@@ -32,6 +32,9 @@
         <activity
             android:name=".activitys.PlaylistActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.ConnectActivity"
+            android:screenOrientation="portrait" />
 
         <service android:name=".services.MidiPlayerService" />
 
@@ -42,6 +45,7 @@
             android:name=".activitys.KategorieActivity"
             android:screenOrientation="portrait" />
         <activity android:name=".db.Playlist_Tracks"></activity>
+
     </application>
 
 </manifest>

@@ -8,11 +8,17 @@
     <string name="stop_recording">Stop Recording</string>
     <string name="external_folder_saving">"Recording will be saved on the SDCard in the &appname;
         Folder"</string>
-    <string name="title_activity_navi">navi</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
+    <string name="Play">Play</string>
+    <string name="Stop">Stop</string>
+    <string name="error_recording_format_exception">Error Loading Recording, Wrong Json Format:</string>
+    <string name="error_recording_load">Error Loading Recording:</string>
+    <string name="file_select">Select a File</string>
+    <string name="file_select_name">Choose a Filename</string>
+    <string name="error_recording_save">Couldn\'t save Json Data</string>
+    <string name="error_recording_add_note">Error while adding Note to JSON</string>
+    <string name="json_midievent">Event</string>
+    <string name="json_recording">recording</string>
+    <string name="neue_kategorie">Neue Kategorie</string>
+    <string name="hinzufügen">Hinzufügen</string>
+    <string name="verwerfen">Verwerfen</string>
 </resources>

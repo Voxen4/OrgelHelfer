@@ -9,9 +9,9 @@ package de.ostfalia.mobile.orgelhelfer.dtw;
  *
  */
 public class StreamBuffer<E> {
-	private int currentElement = -1;
-	private int size;
-	private E[] buffer;
+    public E[] buffer;
+    private int currentElement = -1;
+    private int size;
 	
 	@SuppressWarnings("unchecked")
 	StreamBuffer(final int bufferLength) {

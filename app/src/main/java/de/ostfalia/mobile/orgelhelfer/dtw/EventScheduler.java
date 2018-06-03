@@ -1,6 +1,5 @@
 package de.ostfalia.mobile.orgelhelfer.dtw;
 
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,12 +8,11 @@ import java.util.LinkedList;
 
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
-import de.ostfalia.mobile.orgelhelfer.model.MidiProgram;
 
 public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
-	public static int REPLAYDELAY = 2000;
-	ArrayList<E> events;
-	int currentIndex;
+    public static int REPLAYDELAY = 200;
+    ArrayList<E> events;
+    int currentIndex;
 
 	long time;
 
@@ -45,9 +43,9 @@ public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
 		this.time = time;
 		if(getFollowingIndex(time) <= -1) {
 			running = false;
-			Log.d("EventScheduler", "Songe ended");
-		}
-		currentIndex = getFollowingIndex(time);
+            System.out.println("Songe ended");
+        }
+        currentIndex = getFollowingIndex(time);
 		interrupted = true;
 		t.interrupt();
 	}
@@ -81,12 +79,14 @@ public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
 			} catch (InterruptedException e) {
 			}
 		}
-	}
+        System.out.println("Song ended");
+    }
 
 	private void sendEvent(E event) {
 		if(event instanceof MidiEvent) {
 			MidiEvent e = (MidiEvent) event;
-			MidiDataManager.getInstance().sendEvent(e);
-		}
+            //System.out.print((char) e.getRaw()[1]);
+            MidiDataManager.getInstance().sendEvent(e);
+        }
 	}
 }
