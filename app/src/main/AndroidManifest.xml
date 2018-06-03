@@ -17,19 +17,31 @@
         android:roundIcon="@mipmap/icon_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activitys.StartActivity">
+        <activity
+            android:name=".activitys.StartActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activitys.SetupActivity" />
-        <activity android:name=".activitys.PlaylistActivity" />
+        <activity
+            android:name=".activitys.SetupActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.PlaylistActivity"
+            android:screenOrientation="portrait" />
 
-        <activity android:name=".activitys.ConnectActivity" />
-        <activity android:name=".activitys.KategorieActivity" />
+        <service android:name=".services.MidiPlayerService" />
 
+        <activity
+            android:name=".activitys.BaseActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.KategorieActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".db.Playlist_Tracks"></activity>
     </application>
 
 </manifest>

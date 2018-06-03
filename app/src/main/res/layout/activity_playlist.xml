@@ -1,18 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="de.ostfalia.mobile.orgelhelfer.activitys.PlaylistActivity">
+    android:background="@drawable/background"
 
-    <Button
-        android:id="@+id/button"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
+
+
+    <TextView
+        android:id="@+id/playlist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:fontFamily="sans-serif-smallcaps"
+        android:textColor="@color/cardview_light_background"
+        android:text="Playlists"
+
+        android:background="@drawable/back"
+
+        android:textSize="35sp" />
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rc"
+        android:layout_width="match_parent"
+        android:layout_height="331dp"
+        android:layout_alignParentBottom="true"
+
+        android:layout_alignParentStart="true"
+        android:layout_gravity="center"
+        android:layout_marginBottom="101dp"
+        android:textAlignment="center" />
+
+    <ImageView
+        android:id="@+id/playlistHinzufügen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_gravity="center"
+        android:layout_alignBottom="@+id/erstellen"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="215dp"
-        android:text="Playlist erstellen"
-        tools:layout_editor_absoluteX="109dp"
-        tools:layout_editor_absoluteY="259dp" />
-</RelativeLayout>
+        app:srcCompat="@android:drawable/ic_input_add" />
+
+
+</LinearLayout>
