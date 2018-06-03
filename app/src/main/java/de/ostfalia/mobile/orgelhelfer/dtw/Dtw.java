@@ -2,6 +2,7 @@ package de.ostfalia.mobile.orgelhelfer.dtw;
 
 import android.view.KeyEvent;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
 
     public Dtw(ArrayList<MidiEvent> recordingList, ArrayList<MidiEvent> talkingEvents) {
         rec = new Recording<>(recordingList, RECORDINGBUFFERSIZE);
-        scheduler = new EventScheduler<>(talkingEvents);
+        scheduler = new EventScheduler<>(this, talkingEvents);
         streamBuffer = new StreamBuffer<>(STREAMBUFFERSIZE);
         matrix = new float[STREAMBUFFERSIZE][RECORDINGBUFFERSIZE];
         MidiDataManager.getInstance().addOnMidiDataListener(this);
@@ -34,15 +35,17 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
         ArrayList<MidiEvent> retTalkingList = new ArrayList<>();
         for (int i = 0; i < recordingList.size(); i++) {
             //if(recordingList.get(i).getmType() == MidiConstants.MessageTypes.STATUS_PROGRAM_CHANGE.getType() || recordingList.get(i).getmType() == MidiConstants.MessageTypes.STATUS_CONTROL_CHANGE.getType()) {
-            if (recordingList.get(i).getmType() == MidiConstants.MessageTypes.STATUS_NOTE_ON.getType()
-                    && recordingList.get(i).getRaw()[1] < 59) {
+            if (recordingList.get(i).getmType() == MidiConstants.MessageTypes.STATUS_NOTE_ON.getType()) {
+                    //&& recordingList.get(i).getRaw()[1] < 59) {
 
                 retTalkingList.add(recordingList.get(i));
-            } else {
-                if (recordingList.get(i).getmType() == MidiConstants.MessageTypes.STATUS_NOTE_ON.getType()
-                        && recordingList.get(i).getRaw()[2] > 0)
+                retRecordingList.add(recordingList.get(i));
+            } /*else {
+                if (recordingList.get(i).getmType() == MidiConstants.MessageTypes.STATUS_NOTE_ON.getType()) {
+                    //&& recordingList.get(i).getRaw()[2] > 0)
                     retRecordingList.add(recordingList.get(i));
-            }
+                }
+            }*/
         }
         return new Dtw(retRecordingList, retTalkingList);
     }
@@ -61,10 +64,16 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
             redoMatrix();
         }
         minIndex = minIndexOfCol(streamBuffer.getCurrentIndex());
-        scheduler.updateTime(rec.get(minIndex).getTimestamp());
+
+        //new Auskommentiert
+        //scheduler.setTime(rec.get(minIndex).getTimestamp());
+
         if (minIndex > (int) (RECORDINGBUFFERSIZE * (3f / 4f))) {
             moveMatrix((int) (RECORDINGBUFFERSIZE * (1f / 4f)));
         }
+
+        //new Hinzugefügt
+        minIndex = minIndexOfCol(streamBuffer.getCurrentIndex());
     }
 
     public void redoMatrix() {
@@ -110,19 +119,19 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
 
         if (x > 0 && x != streamBuffer.getCurrentIndex() + 1) {
 
-            neighbours.add(matrix[x - 1][y] + 0.1f);
+            neighbours.add(matrix[x - 1][y] + 0.2f);
             if (y > 0) {
                 neighbours.add(matrix[x - 1][y - 1]);
             }
         } else if (x == 0 && totalStreamedElements > STREAMBUFFERSIZE) {
-            neighbours.add(matrix[matrix.length - 1][y] + 0.1f);
+            neighbours.add(matrix[matrix.length - 1][y] + 0.2f);
             if (y > 0) {
                 neighbours.add(matrix[matrix.length - 1][y - 1]);
             }
         }
 
         if (y > 0) {
-            neighbours.add(matrix[x][y - 1] + 0.1f);
+            neighbours.add(matrix[x][y - 1] + 0.2f);
         }
         return neighbours;
     }
@@ -150,7 +159,10 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
             sb.append(rec.get(i).toString());
             sb.append((char) 9);
             for (int n = 0; n < streamBuffer.getCurrentBufferSize(); n++) {
-                sb.append(matrix[n][i]);
+                //sb.append(matrix[n][i]);
+                DecimalFormat df = new DecimalFormat();
+                df.setMaximumFractionDigits(2);
+                sb.append(df.format(matrix[n][i]));
                 sb.append((char) 9);
                 if (n == streamBuffer.getCurrentIndex()) {
                     sb.append("|");
@@ -166,5 +178,6 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
     @Override
     public void onMidiData(MidiEvent event) {
         next(event);
+        scheduler.setTime(rec.get(minIndex).getTimestamp());
     }
 }

@@ -12,84 +12,81 @@ import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiProgram;
 
 public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
-	private static final String LOG_TAG = EventScheduler.class.getSimpleName();
-	public boolean started = false;
+	public static int REPLAYDELAY = 2000;
 	ArrayList<E> events;
 	int currentIndex;
+
 	long time;
-	Thread t = new Thread(this);
+
+	Dtw dtw;
+	Thread t;
+	boolean started = false;
 	boolean running = false;
-	
-	public EventScheduler(ArrayList<E> events) {
-		t = new Thread(this);
+	boolean interrupted = false;
+
+	public EventScheduler(Dtw dtw, ArrayList<E> events) {
+		this.dtw = dtw;
 		this.events = events;
-		Collections.sort(events);
-		currentIndex = 0;
+		t = new Thread(this);
 	}
-	
-	public void start(long time) {
-		running = true;
-		started = true;
-		this.time = time;
-		//|time - startingTime| sollte immer gleich bleiben.
-		t.start();
-	}
-	
+
 	public boolean hasStarted() {
 		return started;
 	}
-	
-	public void stop() {
-		running = false;
+
+	public void start(long time) {
+		started = true;
+		running = true;
+		this.setTime(time);
+		t.start();
 	}
-	
-	public void updateTime(long time) {
+
+	public void setTime(long time) {
 		this.time = time;
+		if(getFollowingIndex(time) <= -1) {
+			running = false;
+			Log.d("EventScheduler", "Songe ended");
+		}
+		currentIndex = getFollowingIndex(time);
+		interrupted = true;
 		t.interrupt();
+	}
+
+	private int getFollowingIndex(long time) {
+		int i = 0;
+		while(i < events.size() && events.get(i).getTimestamp() <= time) {
+			i++;
+		}//i >= events.size() || events.get(i).getTimestamp() >= time
+		if(i >= events.size()) {
+			return -1;
+		} else {
+			return i;
+		}
 	}
 
 	@Override
 	public void run() {
-		long eventDeltaTime;
-		long systemMilliTime, systemDeltaTime;
-		Iterator<E> it = events.iterator();
-		E currentEvent = it.next();
-		while(running) {
-			eventDeltaTime = currentEvent.getTimestamp() - time;
-			systemMilliTime = System.nanoTime() / 1000000;
+		while(running && currentIndex < events.size()) {
 			try {
-				if(eventDeltaTime > 20) {
-					//System.out.println("Thread will sleep for " + eventDeltaTime);
-					Thread.sleep(eventDeltaTime);
+				if(!interrupted) {
+					Thread.sleep(events.get(currentIndex).getTimestamp() - time);
+				} else {
+					interrupted = false;
+					Thread.sleep(events.get(currentIndex).getTimestamp() - time + REPLAYDELAY);
 				}
-				systemDeltaTime = System.nanoTime() / 1000000 - systemMilliTime;	
-				//System.out.println("Thread selpt for " + systemDeltaTime);
-				time = time + systemDeltaTime;
-				while (currentEvent != null && time > currentEvent.getTimestamp() - 50) {
-					sendEvent(currentEvent);
-					if(it.hasNext()) {
-						currentEvent = it.next();
-					} else {
-						currentEvent = null;
-					}
-				}
-				if(currentEvent == null) {
-					running = false;
-					//System.out.println("All Events send. Stopping Thread.");
-				}
-				
+				sendEvent(events.get(currentIndex));
+				dtw.next((MidiEvent) events.get(currentIndex));
+				this.time = events.get(currentIndex).getTimestamp();
+				currentIndex++;
 			} catch (InterruptedException e) {
 			}
-			
 		}
 	}
 
-	private void sendEvent(E currentEvent) {
-		if(currentEvent instanceof MidiEvent){
-			MidiEvent e = (MidiEvent) currentEvent;
-			//MidiDataManager.getInstance().sendEvent(MidiProgram.ProgramTest);
+	private void sendEvent(E event) {
+		if(event instanceof MidiEvent) {
+			MidiEvent e = (MidiEvent) event;
 			MidiDataManager.getInstance().sendEvent(e);
-			//Log.d(LOG_TAG,"Sending Event: " + e.toString());
 		}
 	}
 }
