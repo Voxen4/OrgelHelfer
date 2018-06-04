@@ -36,8 +36,6 @@
             android:name=".activitys.ConnectActivity"
             android:screenOrientation="portrait" />
 
-        <service android:name=".services.MidiPlayerService" />
-
         <activity
             android:name=".activitys.BaseActivity"
             android:screenOrientation="portrait" />

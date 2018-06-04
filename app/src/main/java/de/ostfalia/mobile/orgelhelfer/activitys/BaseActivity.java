@@ -1,7 +1,6 @@
 package de.ostfalia.mobile.orgelhelfer.activitys;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiManager;
@@ -44,10 +43,9 @@ import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.db.App;
 import de.ostfalia.mobile.orgelhelfer.db.Kategorie;
 import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
-import de.ostfalia.mobile.orgelhelfer.model.Constants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
-import de.ostfalia.mobile.orgelhelfer.services.MidiPlayerService;
+import de.ostfalia.mobile.orgelhelfer.services.Player;
 
 import static android.widget.AdapterView.OnItemClickListener;
 import static android.widget.AdapterView.OnItemSelectedListener;
@@ -307,19 +305,13 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
 
     private void setRecording(JSONObject recordingJson) {
         midiRecording = MidiRecording.createRecordingFromJson(recordingJson);
-        startPlayerService();
         final Button playButton = findViewById(R.id.playButton);
         playButton.setEnabled(true);
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!MidiPlayerService.IS_SERVICE_RUNNING) {
-                    startPlayerService();
-                }
-                if (MidiPlayerService.IS_RECORDING_PLAYING) {
-                    Intent stopIntent = new Intent(getApplicationContext(), MidiPlayerService.class);
-                    stopIntent.setAction(Constants.STOP_PLAYING_RECORDING);
-                    startService(stopIntent);
+                if (Player.IsRecordingPlaying()) {
+                    Player.setIsRecordingPlaying(false);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -327,9 +319,7 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
                         }
                     });
                 } else {
-                    Intent playIntent = new Intent(getApplicationContext(), MidiPlayerService.class);
-                    playIntent.setAction(Constants.START_PLAYING_RECORDING);
-                    startService(playIntent);
+                    Player.playRecording(midiRecording);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -341,12 +331,6 @@ public class BaseActivity extends AppCompatActivity implements MidiDataManager.O
         });
     }
 
-    public void startPlayerService() {
-        Intent startIntent = new Intent(BaseActivity.this, MidiPlayerService.class);
-        startIntent.setAction(Constants.MAIN_ACTION);
-        startService(startIntent);
-
-    }
 
     public ArrayList<CustomMidiDeviceInfo> getMidiDevices() {
         MidiManager midiManager = (MidiManager) getSystemService(MIDI_SERVICE);
