@@ -87,10 +87,10 @@ public class MidiConnectionManager extends MidiManager.DeviceCallback implements
             }
         } catch (IOException e) {
             e.printStackTrace();
-            Log.d(LOG_TAG, "Error Closing port'S before opening them: " + e.toString());
+            Log.d(LOG_TAG, "Error Closing port's before opening them: " + e.toString());
         }
         outputPort = midiDevice.openOutputPort(0);
-        inputPort = midiDevice.openInputPort(0);//TODO Port index ?
+        inputPort = midiDevice.openInputPort(0);
         if (outputPort != null && MidiDataManager.getInstance().receiver != null) {
             outputPort.connect(MidiDataManager.getInstance().receiver);
         }

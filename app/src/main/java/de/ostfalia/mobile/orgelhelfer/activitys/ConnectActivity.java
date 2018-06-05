@@ -2,7 +2,6 @@ package de.ostfalia.mobile.orgelhelfer.activitys;
 
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -46,7 +45,7 @@ import de.ostfalia.mobile.orgelhelfer.services.Player;
 import static android.widget.AdapterView.OnItemClickListener;
 import static android.widget.AdapterView.OnItemSelectedListener;
 
-public class ConnectActivity extends BaseActivity implements MidiDataManager.OnMidiDataListener, MidiConnectionManager.OnDeviceChangedListener {
+public class ConnectActivity extends BaseActivity implements MidiDataManager.OnMidiDataListener {
 
     private static final String LOG_TAG = ConnectActivity.class.getSimpleName();
     public static MidiRecording midiRecording;
@@ -66,9 +65,7 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
         if (getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_MIDI)) {
             // do MIDI stuff
             // SetupActivity a menu to select an input source.
-            MidiConnectionManager.getInstance().setMidiManager(midiManager);
             MidiDataManager.getInstance().addOnMidiDataListener(this);
-            MidiConnectionManager.getInstance().addOnDevicesChangedListener(this);
         }
         listView = findViewById(R.id.list);
         ArrayAdapter adapter = new MidiEventArrayAdapter(this, R.layout.simple_list_item_slim, log);
@@ -86,7 +83,7 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
 
         spinner = findViewById(R.id.spinner);
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-        ArrayAdapter<CustomMidiDeviceInfo> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, getMidiDevices());
+        ArrayAdapter<CustomMidiDeviceInfo> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, devices);
         spinner.setAdapter(arrayAdapter);
         spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
@@ -112,7 +109,6 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
     @Override
     public void onPause() {
         super.onPause();
-        MidiConnectionManager.getInstance().removeOnDevicesChangedListener(this);
         MidiDataManager.getInstance().removeOnMidiDataListener(this);
     }
 
@@ -120,7 +116,6 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
     public void onResume() {
         super.onResume();
         MidiDataManager.getInstance().addOnMidiDataListener(this);
-        MidiConnectionManager.getInstance().addOnDevicesChangedListener(this);
         //stopService();
     }
 
@@ -179,10 +174,11 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
 
     @Override
     public void onDevicesChanged() {
+        super.onDevicesChanged();
         Spinner spinner = findViewById(R.id.spinner);
         spinner.getAdapter();
         ArrayAdapter<CustomMidiDeviceInfo> arrayAdapter =
-                new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, getMidiDevices());
+                new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, devices);
         //Had to add this listeners cause apparently spinner doesn't keep a reference to the original List.
         spinner.setAdapter(arrayAdapter);
     }
@@ -297,7 +293,7 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
                         }
                     });
                 } else {
-                    Player.playRecording(midiRecording);
+                    Player.playRecording(midiRecording, null);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -309,17 +305,5 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
         });
     }
 
-    public ArrayList<CustomMidiDeviceInfo> getMidiDevices() {
-        MidiManager midiManager = (MidiManager) getSystemService(MIDI_SERVICE);
-        ArrayList<CustomMidiDeviceInfo> list = new ArrayList<>();
-        if (midiManager == null) {
-            return list;
-        }
-        MidiDeviceInfo[] infos = midiManager.getDevices();
-        for (int i = 0; i < infos.length; i++) {
-            list.add(new CustomMidiDeviceInfo(infos[i]));
-        }
-        return list;
-    }
 
 }

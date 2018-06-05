@@ -19,11 +19,12 @@ public class Player {
     private static final String LOG_TAG = Player.class.getSimpleName();
     private static boolean IS_RECORDING_PLAYING = false;
 
-    public static void playRecording(final MidiRecording recording) {
+    public static void playRecording(final MidiRecording recording, final SongStateCallback callback) {
 
 
         Log.d(LOG_TAG, "Start Playing the Recording");
         IS_RECORDING_PLAYING = true;
+        notifyCallback(callback, SongState.PLAYING);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -56,10 +57,24 @@ public class Player {
                     }
 
                 }
+                notifyCallback(callback, SongState.STOPPED);
+                IS_RECORDING_PLAYING = false;
             }
         }).
 
                 start();
+    }
+
+    private static void notifyCallback(SongStateCallback callback, SongState state) {
+        if (callback != null) callback.songStateChanged(state);
+    }
+
+    public enum SongState {
+        PLAYING, STOPPED
+    }
+
+    interface SongStateCallback {
+        void songStateChanged(SongState state);
     }
 
     public static boolean IsRecordingPlaying() {
