@@ -2,6 +2,9 @@ package de.ostfalia.mobile.orgelhelfer.db;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.media.midi.MidiDeviceInfo;
+import android.media.midi.MidiManager;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,9 +14,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,13 +46,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.ostfalia.mobile.orgelhelfer.MidiConnectionManager;
+import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
+import de.ostfalia.mobile.orgelhelfer.MidiEventArrayAdapter;
 import de.ostfalia.mobile.orgelhelfer.R;
 
+import de.ostfalia.mobile.orgelhelfer.activitys.BaseActivity;
+import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
+import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
 import de.ostfalia.mobile.orgelhelfer.services.Player;
 
 
-public class Playlist_Tracks extends AppCompatActivity {
+public class Playlist_Tracks extends BaseActivity {
 
 
     private static final String LOG_TAG = Playlist_Tracks.class.getSimpleName();
@@ -197,6 +208,8 @@ public class Playlist_Tracks extends AppCompatActivity {
 
     }
 
+
+
     static class MyItem {
         public final long id;
         public final String text;
@@ -291,7 +304,8 @@ public class Playlist_Tracks extends AppCompatActivity {
 
         private void setRecording(JSONObject recordingJson, View v) {
             midiRecording = MidiRecording.createRecordingFromJson(recordingJson);
-
+            playTrack.setEnabled(true);
+            Player.setIsRecordingPlaying(false);
 
             playTrack.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -305,7 +319,7 @@ public class Playlist_Tracks extends AppCompatActivity {
                             }
                         });
                     } else {
-                        Player.playRecording(midiRecording);
+                        Player.playRecording(midiRecording, null);
                         main.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -367,21 +381,6 @@ public class Playlist_Tracks extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-    }
-
-    public void onDestroy() {
-        super.onDestroy();
-        Log.i(LOG_TAG, "In onDestroy");
-    }
 
 
 }
