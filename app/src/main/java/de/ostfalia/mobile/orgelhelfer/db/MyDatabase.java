@@ -11,7 +11,7 @@ public abstract class MyDatabase extends RoomDatabase {
     public abstract KategorieDao kategorieDao();
     public abstract PlaylistDao playlistDao();
     public abstract TrackDao trackDao();
-    
+
     static final Migration MIGRATION_3_1 = new Migration(3, 1) {
         @Override
         public void migrate(SupportSQLiteDatabase database) {

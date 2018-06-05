@@ -1,6 +1,5 @@
 package de.ostfalia.mobile.orgelhelfer.dtw;
 
-import android.view.KeyEvent;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -9,7 +8,6 @@ import java.util.List;
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
-import de.ostfalia.mobile.orgelhelfer.model.MidiNote;
 
 public class Dtw implements MidiDataManager.OnMidiDataListener {
     public static final int RECORDINGBUFFERSIZE = 100;

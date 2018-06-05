@@ -248,7 +248,13 @@ public class Playlist_Tracks extends AppCompatActivity {
 
             mItems.add(new MyItem(counter,trackTitle, jsonObject));
             counter++;
-            notifyDataSetChanged();
+            main.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    notifyDataSetChanged();
+                }
+            });
+
         }
 
         @Override
@@ -295,7 +301,7 @@ public class Playlist_Tracks extends AppCompatActivity {
                         main.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                playTrack.setBackgroundResource(R.mipmap.play);
+                                playTrack.setImageResource(R.mipmap.play);
                             }
                         });
                     } else {
@@ -303,7 +309,7 @@ public class Playlist_Tracks extends AppCompatActivity {
                         main.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                playTrack.setBackgroundResource(R.mipmap.pausebutton);
+                                playTrack.setImageResource(R.mipmap.pausebutton);
                             }
                         });
                     }
