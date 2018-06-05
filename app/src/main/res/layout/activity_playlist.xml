@@ -35,8 +35,8 @@
 
     <ImageView
         android:id="@+id/playlistHinzufügen"
-        android:layout_width="200px"
-        android:layout_height="200px"
+        android:layout_width="150px"
+        android:layout_height="150px"
         android:layout_marginTop="10dp"
         android:layout_alignBottom="@+id/erstellen"
         android:layout_centerHorizontal="true"

@@ -3,10 +3,13 @@ package de.ostfalia.mobile.orgelhelfer.activitys;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +39,7 @@ import de.ostfalia.mobile.orgelhelfer.db.Playlist;
 
 public class PlaylistActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = PlaylistActivity.class.getSimpleName();
     private MyDatabase database;
     private static int counter = 0;
     private PlaylistActivity.MyAdapter adapter = null;
@@ -155,20 +159,6 @@ public class PlaylistActivity extends AppCompatActivity {
     }
 
 
-
-
-
-    static class MyItem {
-        public final long id;
-        public final String text;
-
-        public MyItem(long id, String text) {
-            this.id = id;
-            this.text = text;
-
-        }
-    }
-
     static class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> implements SwipeableItemAdapter<MyAdapter.MyViewHolder> {
         interface Swipeable extends SwipeableItemConstants {
         }
@@ -195,7 +185,7 @@ public class PlaylistActivity extends AppCompatActivity {
 
 
         }
-        List<MyItem> mItems;
+        List<Playlist> mItems;
 
         public MyAdapter() {
             setHasStableIds(true); // this is required for swiping feature.
@@ -203,14 +193,14 @@ public class PlaylistActivity extends AppCompatActivity {
         }
 
         public void createnewItem(String playlistName) {
-            mItems.add(new PlaylistActivity.MyItem(counter, playlistName));
+            mItems.add(new Playlist(counter, playlistName));
             counter++;
 
         }
 
         @Override
         public long getItemId(int position) {
-            return mItems.get(position).id; // need to return stable (= not change even after position changed) value
+            return mItems.get(position).getUid(); // need to return stable (= not change even after position changed) value
         }
 
         @Override
@@ -221,16 +211,15 @@ public class PlaylistActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(MyAdapter.MyViewHolder holder, int position) {
-            final PlaylistActivity.MyItem item = mItems.get(position);
+            final Playlist item = mItems.get(position);
 
-            holder.textView.setText(item.text);
+            holder.textView.setText(item.getName());
 
             holder.containerView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
                     Intent intent = new Intent(v.getContext(), Playlist_Tracks.class);
-                    intent.putExtra("playlistName", item.text);
+                    intent.putExtra("playlistName", item);
                     v.getContext().startActivity(intent);
 
                 }
