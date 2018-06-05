@@ -5,6 +5,9 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 @Entity
 public class Track {
 
@@ -15,16 +18,32 @@ public class Track {
     private String trackTitel;
 
     @ColumnInfo
-    private String kuenstlerName;
+    private String playlistName;
 
     @ColumnInfo
-    private double lengthTrack;
+    private String jsonObjectString;
 
-    public Track(String trackTitel, String kuenstlerName, double lengthTrack) {
+    public Track(String trackTitel, String playlistName, String jsonObjectString) {
         this.trackTitel = trackTitel;
-        this.kuenstlerName = kuenstlerName;
-        this.lengthTrack = lengthTrack;
+
+        this.playlistName = playlistName;
+        this.jsonObjectString=jsonObjectString;
     }
+
+
+    public String getPlaylistName() {
+        return playlistName;
+    }
+
+    public void setPlaylistName (String name) {
+        this.playlistName=name;
+    }
+
+    public void setJsonObjectString(String json) {
+        this.jsonObjectString=json;
+    }
+
+
 
     public int getUid() {
         return uid;
@@ -42,19 +61,13 @@ public class Track {
         this.trackTitel = trackTitel;
     }
 
-    public String getKuenstlerName() {
-        return kuenstlerName;
+    public JSONObject getJsonObject() throws JSONException {
+
+        return new JSONObject(jsonObjectString);
     }
 
-    public void setKuenstlerName(String kuenstlerName) {
-        this.kuenstlerName = kuenstlerName;
+    public String getJsonObjectString () {
+        return jsonObjectString;
     }
 
-    public double getLengthTrack() {
-        return lengthTrack;
-    }
-
-    public void setLengthTrack(double lengthTrack) {
-        this.lengthTrack = lengthTrack;
-    }
 }

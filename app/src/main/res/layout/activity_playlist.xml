@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background"
-
     android:gravity="center_vertical"
     android:orientation="vertical">
 
@@ -20,31 +19,29 @@
         android:fontFamily="sans-serif-smallcaps"
         android:textColor="@color/cardview_light_background"
         android:text="Playlists"
-
-        android:background="@drawable/back"
-
+        android:background="@drawable/backgroundheading"
         android:textSize="35sp" />
 
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/rc"
+        android:id="@+id/recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="331dp"
+        android:layout_height="400dp"
         android:layout_alignParentBottom="true"
-
         android:layout_alignParentStart="true"
         android:layout_gravity="center"
-        android:layout_marginBottom="101dp"
+        android:layout_marginBottom="10dp"
         android:textAlignment="center" />
 
     <ImageView
         android:id="@+id/playlistHinzufügen"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_width="200px"
+        android:layout_height="200px"
+        android:layout_marginTop="10dp"
         android:layout_alignBottom="@+id/erstellen"
         android:layout_centerHorizontal="true"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        android:layout_gravity="center"
+        app:srcCompat="@mipmap/additem" />
 
 
 </LinearLayout>

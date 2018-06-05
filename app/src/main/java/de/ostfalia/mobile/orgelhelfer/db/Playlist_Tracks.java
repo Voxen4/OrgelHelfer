@@ -1,49 +1,145 @@
 package de.ostfalia.mobile.orgelhelfer.db;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
 import com.github.angads25.filepicker.view.FilePickerDialog;
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter;
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemConstants;
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultAction;
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultActionDefault;
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultActionRemoveItem;
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.annotation.SwipeableItemDrawableTypes;
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.annotation.SwipeableItemResults;
+import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractSwipeableItemViewHolder;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.ostfalia.mobile.orgelhelfer.R;
 
+import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
+import de.ostfalia.mobile.orgelhelfer.services.Player;
+
+
 public class Playlist_Tracks extends AppCompatActivity {
 
-    TextView tx_name;
-    ImageView trackHinzufuegen;
+
+    private static final String LOG_TAG = Playlist_Tracks.class.getSimpleName();
+    private TextView playlistName;
+    private MyDatabase database;
+    private static int counter = 0;
+    private MyAdapter adapter = null;
+    public List<Track> data;
+    private Track temp;
+    private Playlist playlist;
+    public static MidiRecording midiRecording;
+    private static Playlist_Tracks main;
+    private static Context context;
+    private static ImageView playTrack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist__tracks);
+        Playlist_Tracks.context = getApplicationContext();
 
-        tx_name = findViewById(R.id.playlistName);
-        tx_name.setText(getIntent().getStringExtra("playlistName"));
-        tx_name.setTextSize(25);
-        tx_name.setTextAppearance(R.style.fontForNotificationLandingPage);
+        Bundle dataFromPlaylist = getIntent().getExtras();
+        playlist = dataFromPlaylist.getParcelable("playlistName");
+        playTrack = findViewById(R.id.playTrack);
 
-        trackHinzufuegen = findViewById(R.id.trackHinzufügen);
+        main = Playlist_Tracks.this;
+        final RecyclerView recyclerView = findViewById(R.id.recyclerview);
+        RecyclerViewSwipeManager swipeMgr = new RecyclerViewSwipeManager();
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        adapter = new MyAdapter();
+
+        playlistName = findViewById(R.id.playlistName);
+        playlistName.setText(playlist.getName().toString());
+        playlistName.setTextSize(35);
+        playlistName.setTextAppearance(R.style.fontForNotificationLandingPage);
+
+        ImageView trackHinzufuegen = findViewById(R.id.trackHinzufügen);
         trackHinzufuegen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 loadRecordings(v);
+
             }
         });
 
+
+
+        //Swipe zum Löschen der Daten!
+        swipeMgr.setOnItemSwipeEventListener(new RecyclerViewSwipeManager.OnItemSwipeEventListener() {
+            public void onItemSwipeStarted(int position) {
+            }
+
+            public void onItemSwipeFinished(int position, int result, int afterSwipeReaction) {
+
+                if (result == 4 || result == 2) {
+                    temp = data.get(position);
+                    data.remove(position);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            database.trackDao().delete(temp);
+                        }
+                    }).start();
+                }
+
+            }
+        });
+
+
+        // Erstellen der Datenbank bei Öffnen der Activity
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                database = App.get().getDB();
+                data = database.trackDao().getAllTracks(playlist.getName());
+                for (int i = 0; i < data.size(); i++) {
+                    try {
+                        adapter.createnewItem(data.get(i).getTrackTitel(),data.get(i).getJsonObject());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+
+        recyclerView.setAdapter(swipeMgr.createWrappedAdapter(adapter));
+        swipeMgr.attachRecyclerView(recyclerView);
+
+        if (midiRecording != null) {
+            playTrack.setEnabled(true);
+        }
     }
 
 
@@ -55,13 +151,13 @@ public class Playlist_Tracks extends AppCompatActivity {
         properties.error_dir = new File(DialogConfigs.DEFAULT_DIR);
         properties.offset = new File(DialogConfigs.DEFAULT_DIR);
         properties.extensions = new String[]{"json"};
-        FilePickerDialog dialog = new FilePickerDialog(this, properties);
+        final FilePickerDialog dialog = new FilePickerDialog(this, properties);
         dialog.setTitle("Datei auswählen");
         dialog.show();
         dialog.setDialogSelectionListener(new DialogSelectionListener() {
             @Override
             public void onSelectedFilePaths(String[] files) {
-                File file = new File(files[0]);
+                final File file = new File(files[0]);
                 JSONObject jsonObject = null;
                 if (file.exists()) {
                     try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -70,12 +166,215 @@ public class Playlist_Tracks extends AppCompatActivity {
                             String line = reader.readLine();
                             jsonString.append(line);
                         }
+                        jsonObject = new JSONObject(jsonString.toString());
                     } catch (IOException e) {
+                        Log.d(LOG_TAG, "Error Loading Recording: " + e.toString());
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        Log.d(LOG_TAG, "Error Loading Recording Wrong Json Format: " + e.toString());
                         e.printStackTrace();
                     }
+
                 }
+                adapter.createnewItem(file.getName().substring(0,file.getName().lastIndexOf(46)), jsonObject);
+                final JSONObject finalJsonObject = jsonObject;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        temp = new Track(file.getName().substring(0,file.getName().lastIndexOf(46)), playlist.getName(), finalJsonObject.toString());
+                        data.add(temp);
+                        database.trackDao().insertOne(temp);
+                        // Nochmal holen der Datanbank, damit Einträge direkt gelöscht werden können!
+                        data = database.trackDao().getAllTracks(playlist.getName());
+
+                    }
+                }).start();
+
+
+
             }
         });
+
+    }
+
+    static class MyItem {
+        public final long id;
+        public final String text;
+        private final JSONObject jsonObject;
+
+        public MyItem(long id, String text, JSONObject jsonObject) {
+            this.id = id;
+            this.text = text;
+            this.jsonObject = jsonObject;
+
+
+        }
+    }
+
+
+    static class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> implements SwipeableItemAdapter<MyAdapter.MyViewHolder> {
+        interface Swipeable extends SwipeableItemConstants {
+        }
+
+
+        class MyViewHolder extends AbstractSwipeableItemViewHolder {
+            FrameLayout containerView;
+            TextView textView;
+
+            public MyViewHolder(View itemView) {
+                super(itemView);
+                containerView = itemView.findViewById(R.id.container);
+                textView = itemView.findViewById(android.R.id.text1);
+                textView.setTextSize(25);
+
+                textView.setTextAppearance(R.style.fontForNotificationLandingPage);
+            }
+
+            @Override
+            public View getSwipeableContainerView() {
+                return containerView;
+            }
+        }
+
+        List<MyItem> mItems;
+        private int selectedPos = RecyclerView.NO_POSITION;
+
+        public MyAdapter() {
+            setHasStableIds(true); // this is required for swiping feature.
+            mItems = new ArrayList<>();
+        }
+
+        public void createnewItem(String trackTitle, JSONObject jsonObject) {
+
+            mItems.add(new MyItem(counter,trackTitle, jsonObject));
+            counter++;
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return mItems.get(position).id; // need to return stable (= not change even after position changed) value
+        }
+
+        @Override
+        public MyAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_for_swipe_minimal, parent, false);
+            return new MyAdapter.MyViewHolder(v);
+        }
+
+        @Override
+        public void onBindViewHolder(final MyAdapter.MyViewHolder holder, final int position) {
+            final MyItem item = mItems.get(position);
+            holder.textView.setText(item.text);
+            holder.itemView.setSelected(selectedPos==position);
+
+
+            holder.containerView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                        setRecording(item.jsonObject, v);
+
+                }
+            });
+
+
+
+        }
+
+
+        private void setRecording(JSONObject recordingJson, View v) {
+            midiRecording = MidiRecording.createRecordingFromJson(recordingJson);
+
+
+            playTrack.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (Player.IsRecordingPlaying()) {
+                        Player.setIsRecordingPlaying(false);
+                        main.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                playTrack.setBackgroundResource(R.mipmap.play);
+                            }
+                        });
+                    } else {
+                        Player.playRecording(midiRecording);
+                        main.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                playTrack.setBackgroundResource(R.mipmap.pausebutton);
+                            }
+                        });
+                    }
+                }
+            });
+
+        }
+
+
+        @Override
+        public int getItemCount() {
+            return mItems.size();
+        }
+
+        @Override
+        public void onSwipeItemStarted(MyAdapter.MyViewHolder holder, int position) {
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public SwipeResultAction onSwipeItem(MyAdapter.MyViewHolder holder, int position, @SwipeableItemResults int result) {
+            if (result == Playlist_Tracks.MyAdapter.Swipeable.RESULT_CANCELED) {
+                return new SwipeResultActionDefault();
+            } else {
+                return new Playlist_Tracks.MyAdapter.MySwipeResultActionRemoveItem(this, position);
+            }
+        }
+
+        @Override
+        public int onGetSwipeReactionType(MyAdapter.MyViewHolder holder, int position, int x, int y) {
+            return Playlist_Tracks.MyAdapter.Swipeable.REACTION_CAN_SWIPE_BOTH_H;
+        }
+
+        @Override
+        public void onSetSwipeBackground(MyAdapter.MyViewHolder holder, int position, @SwipeableItemDrawableTypes int type) {
+        }
+
+        static class MySwipeResultActionRemoveItem extends SwipeResultActionRemoveItem {
+            private Playlist_Tracks.MyAdapter adapter;
+            private int position;
+
+
+            public MySwipeResultActionRemoveItem(Playlist_Tracks.MyAdapter adapter, int position) {
+                this.adapter = adapter;
+                this.position = position;
+
+            }
+
+            @Override
+            protected void onPerformAction() {
+                adapter.mItems.remove(position);
+                adapter.notifyItemRemoved(position);
+
+            }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i(LOG_TAG, "In onDestroy");
     }
 
 

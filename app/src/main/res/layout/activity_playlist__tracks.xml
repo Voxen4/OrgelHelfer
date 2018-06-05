@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+
     android:layout_width="match_parent"
+    android:id="@+id/content"
     android:layout_height="match_parent"
     android:background="@drawable/background"
     android:gravity="center_vertical"
@@ -10,31 +11,49 @@
 
     <TextView
         android:id="@+id/playlistName"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:fontFamily="sans-serif-smallcaps"
+        android:gravity="center_horizontal"
         android:text="PlaylistName"
+        android:fontFamily="sans-serif-smallcaps"
+        android:background="@drawable/backgroundheading"
         android:textColor="@color/cardview_light_background"
-        android:textSize="24sp" />
+        android:textSize="35sp"
+        />
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/rc"
+        android:id="@+id/recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="331dp"
-
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
+        android:layout_height="300dp"
+        android:layout_marginTop="10dp"
         android:layout_gravity="center"
-        android:layout_marginBottom="101dp"
+        android:layout_marginBottom="10dp"
         android:textAlignment="center" />
 
-    <ImageView
-        android:id="@+id/trackHinzufügen"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/erstellen"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center"
-        app:srcCompat="@android:drawable/ic_input_add" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/trackHinzufügen"
+            android:layout_width="200px"
+            android:layout_height="200px"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            app:srcCompat="@mipmap/additem" />
+
+        <ImageView
+            android:id="@+id/playTrack"
+            android:layout_width="200px"
+            android:layout_height="200px"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            app:srcCompat="@mipmap/play" />
+
+
+    </RelativeLayout>
+
 </LinearLayout>

@@ -11,8 +11,8 @@ import java.util.List;
 @Dao
 public interface TrackDao {
 
-    @Query("SELECT * FROM Track")
-    List<Track> getAll();
+    @Query("SELECT * FROM Track WHERE playlistName LIKE :playlist")
+    List<Track> getAllTracks(String playlist);
 
     @Insert
     void insertAll(List<Track> trackList);

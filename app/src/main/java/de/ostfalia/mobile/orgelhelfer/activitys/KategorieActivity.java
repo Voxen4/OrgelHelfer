@@ -53,7 +53,7 @@ public class KategorieActivity extends BaseActivity {
 
         setContentView(R.layout.activity_kategorie);
 
-        RecyclerView recyclerView = findViewById(R.id.rc);
+        RecyclerView recyclerView = findViewById(R.id.recyclerview);
         ImageView addItem = findViewById(R.id.kategorieHinzufügen);
 
 

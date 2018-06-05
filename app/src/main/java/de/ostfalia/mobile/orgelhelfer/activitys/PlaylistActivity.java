@@ -34,10 +34,10 @@ import de.ostfalia.mobile.orgelhelfer.db.App;
 import de.ostfalia.mobile.orgelhelfer.db.MyDatabase;
 import de.ostfalia.mobile.orgelhelfer.db.Playlist;
 
-public class PlaylistActivity extends BaseActivity {
+public class PlaylistActivity extends AppCompatActivity {
 
     private MyDatabase database;
-    private static long counter = 0;
+    private static int counter = 0;
     private PlaylistActivity.MyAdapter adapter = null;
     public static List<Playlist> playlistData;
     private ImageView erstellen;
@@ -50,7 +50,7 @@ public class PlaylistActivity extends BaseActivity {
         setContentView(R.layout.activity_playlist);
 
 
-        RecyclerView recyclerView = findViewById(R.id.rc);
+        RecyclerView recyclerView = findViewById(R.id.recyclerview);
         RecyclerViewSwipeManager swipeMgr = new RecyclerViewSwipeManager();
 
         erstellen = (findViewById(R.id.playlistHinzufügen));
@@ -129,7 +129,7 @@ public class PlaylistActivity extends BaseActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                playlist = new Playlist(edittext.getText().toString());
+                                playlist = new Playlist(counter, edittext.getText().toString());
                                 playlistData.add(playlist);
                                 database.playlistDao().insertOne(playlist);
                                 // Nochmal holen der Datanbank, damit Einträge direkt gelöscht werden können!
