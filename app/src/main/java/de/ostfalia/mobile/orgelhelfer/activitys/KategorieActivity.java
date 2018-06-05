@@ -1,6 +1,7 @@
 package de.ostfalia.mobile.orgelhelfer.activitys;
 
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -55,6 +56,10 @@ public class KategorieActivity extends BaseActivity {
 
         RecyclerView recyclerView = findViewById(R.id.recyclerview);
         ImageView addItem = findViewById(R.id.kategorieHinzufügen);
+
+        android.support.v7.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setBackgroundColor(Color.TRANSPARENT);
 
 
 

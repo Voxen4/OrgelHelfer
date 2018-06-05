@@ -20,4 +20,15 @@
 
     </style>
 
+    <style name="toolbarText">
+
+        <item name="android:fontFamily">sans-serif-smallcaps</item>
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:textSize">35dp</item>
+    </style>
+
+    <style name="toolbar">
+
+    </style>
+
 </resources>

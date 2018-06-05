@@ -2,6 +2,7 @@ package de.ostfalia.mobile.orgelhelfer.activitys;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -52,6 +53,10 @@ public class PlaylistActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist);
+
+        android.support.v7.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setBackgroundColor(Color.TRANSPARENT);
 
 
         RecyclerView recyclerView = findViewById(R.id.recyclerview);
@@ -107,11 +112,6 @@ public class PlaylistActivity extends AppCompatActivity {
 
         swipeMgr.attachRecyclerView(recyclerView);
 
-
-
-
-
-
         erstellen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -133,7 +133,7 @@ public class PlaylistActivity extends AppCompatActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                playlist = new Playlist(counter, edittext.getText().toString());
+                                playlist = new Playlist(edittext.getText().toString());
                                 playlistData.add(playlist);
                                 database.playlistDao().insertOne(playlist);
                                 // Nochmal holen der Datanbank, damit Einträge direkt gelöscht werden können!
@@ -158,6 +158,42 @@ public class PlaylistActivity extends AppCompatActivity {
 
     }
 
+    public static class MyItem implements Parcelable {
+        public final int id;
+        public final String text;
+
+        public MyItem(int id, String text) {
+            this.id = id;
+            this.text = text;
+        }
+
+        public MyItem (Parcel in) {
+            id = in.readInt();
+            text = in.readString();
+        }
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(id);
+            dest.writeString(text);
+
+        }
+
+        public static final Parcelable.Creator<MyItem> CREATOR = new Parcelable.Creator<MyItem>() {
+
+            public MyItem createFromParcel(Parcel in) {
+                return new MyItem(in);
+            }
+
+            public MyItem[] newArray(int size) {
+                return new MyItem[size];
+            }
+        };
+    }
 
     static class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> implements SwipeableItemAdapter<MyAdapter.MyViewHolder> {
         interface Swipeable extends SwipeableItemConstants {
@@ -185,7 +221,7 @@ public class PlaylistActivity extends AppCompatActivity {
 
 
         }
-        List<Playlist> mItems;
+        List<MyItem> mItems;
 
         public MyAdapter() {
             setHasStableIds(true); // this is required for swiping feature.
@@ -193,14 +229,14 @@ public class PlaylistActivity extends AppCompatActivity {
         }
 
         public void createnewItem(String playlistName) {
-            mItems.add(new Playlist(counter, playlistName));
+            mItems.add(new MyItem(counter, playlistName));
             counter++;
 
         }
 
         @Override
         public long getItemId(int position) {
-            return mItems.get(position).getUid(); // need to return stable (= not change even after position changed) value
+            return mItems.get(position).id; // need to return stable (= not change even after position changed) value
         }
 
         @Override
@@ -211,9 +247,10 @@ public class PlaylistActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(MyAdapter.MyViewHolder holder, int position) {
-            final Playlist item = mItems.get(position);
+            final MyItem item = mItems.get(position);
 
-            holder.textView.setText(item.getName());
+            holder.textView.setText(item.text);
+
 
             holder.containerView.setOnClickListener(new View.OnClickListener() {
                 @Override

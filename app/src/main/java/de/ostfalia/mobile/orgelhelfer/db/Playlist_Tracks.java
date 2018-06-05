@@ -3,6 +3,7 @@ package de.ostfalia.mobile.orgelhelfer.db;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiManager;
 import android.os.Environment;
@@ -10,6 +11,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
@@ -52,6 +56,7 @@ import de.ostfalia.mobile.orgelhelfer.MidiEventArrayAdapter;
 import de.ostfalia.mobile.orgelhelfer.R;
 
 import de.ostfalia.mobile.orgelhelfer.activitys.BaseActivity;
+import de.ostfalia.mobile.orgelhelfer.activitys.PlaylistActivity;
 import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
@@ -68,7 +73,7 @@ public class Playlist_Tracks extends BaseActivity {
     private MyAdapter adapter = null;
     public List<Track> data;
     private Track temp;
-    private Playlist playlist;
+    private PlaylistActivity.MyItem playlist;
     public static MidiRecording midiRecording;
     private static Playlist_Tracks main;
     private static Context context;
@@ -84,6 +89,9 @@ public class Playlist_Tracks extends BaseActivity {
         playlist = dataFromPlaylist.getParcelable("playlistName");
         playTrack = findViewById(R.id.playTrack);
 
+
+
+
         main = Playlist_Tracks.this;
         final RecyclerView recyclerView = findViewById(R.id.recyclerview);
         RecyclerViewSwipeManager swipeMgr = new RecyclerViewSwipeManager();
@@ -91,10 +99,10 @@ public class Playlist_Tracks extends BaseActivity {
 
         adapter = new MyAdapter();
 
-        playlistName = findViewById(R.id.playlistName);
-        playlistName.setText(playlist.getName().toString());
-        playlistName.setTextSize(35);
-        playlistName.setTextAppearance(R.style.fontForNotificationLandingPage);
+        android.support.v7.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setBackgroundColor(Color.TRANSPARENT);
+        toolbar.setTitle(playlist.text);
 
         ImageView trackHinzufuegen = findViewById(R.id.trackHinzufügen);
         trackHinzufuegen.setOnClickListener(new View.OnClickListener() {
@@ -134,7 +142,7 @@ public class Playlist_Tracks extends BaseActivity {
             @Override
             public void run() {
                 database = App.get().getDB();
-                data = database.trackDao().getAllTracks(playlist.getName());
+                data = database.trackDao().getAllTracks(playlist.text);
                 for (int i = 0; i < data.size(); i++) {
                     try {
                         adapter.createnewItem(data.get(i).getTrackTitel(),data.get(i).getJsonObject());
@@ -192,11 +200,11 @@ public class Playlist_Tracks extends BaseActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        temp = new Track(file.getName().substring(0,file.getName().lastIndexOf(46)), playlist.getName(), finalJsonObject.toString());
+                        temp = new Track(file.getName().substring(0,file.getName().lastIndexOf(46)), playlist.text, finalJsonObject.toString());
                         data.add(temp);
                         database.trackDao().insertOne(temp);
                         // Nochmal holen der Datanbank, damit Einträge direkt gelöscht werden können!
-                        data = database.trackDao().getAllTracks(playlist.getName());
+                        data = database.trackDao().getAllTracks(playlist.text);
 
                     }
                 }).start();
@@ -286,13 +294,18 @@ public class Playlist_Tracks extends BaseActivity {
             final MyItem item = mItems.get(position);
             holder.textView.setText(item.text);
             holder.itemView.setSelected(selectedPos==position);
-
+            holder.itemView.setBackgroundResource(selectedPos == position ? R.drawable.markeditem : Color.TRANSPARENT);
 
             holder.containerView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                        setRecording(item.jsonObject, v);
+                    if (holder.getAdapterPosition() == RecyclerView.NO_POSITION) return;
+
+                    notifyItemChanged(selectedPos);
+                    selectedPos = holder.getLayoutPosition();
+                    notifyItemChanged(selectedPos);
+                    setRecording(item.jsonObject);
 
                 }
             });
@@ -302,7 +315,7 @@ public class Playlist_Tracks extends BaseActivity {
         }
 
 
-        private void setRecording(JSONObject recordingJson, View v) {
+        private void setRecording(JSONObject recordingJson) {
             midiRecording = MidiRecording.createRecordingFromJson(recordingJson);
             playTrack.setEnabled(true);
             Player.setIsRecordingPlaying(false);
