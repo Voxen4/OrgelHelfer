@@ -11,26 +11,7 @@ public abstract class MyDatabase extends RoomDatabase {
     public abstract KategorieDao kategorieDao();
     public abstract PlaylistDao playlistDao();
     public abstract TrackDao trackDao();
-
-    static final Migration MIGRATION_1_2 = new Migration(1, 2) {
-        @Override
-        public void migrate(SupportSQLiteDatabase database) {
-
-        }
-    };
-    static final Migration MIGRATION_2_3 = new Migration(2, 3) {
-        @Override
-        public void migrate(SupportSQLiteDatabase database) {
-
-        }
-    };
-
-    static final Migration MIGRATION_3_4 = new Migration(3, 4) {
-        @Override
-        public void migrate(SupportSQLiteDatabase database) {
-
-        }
-    };
+    
     static final Migration MIGRATION_3_1 = new Migration(3, 1) {
         @Override
         public void migrate(SupportSQLiteDatabase database) {
