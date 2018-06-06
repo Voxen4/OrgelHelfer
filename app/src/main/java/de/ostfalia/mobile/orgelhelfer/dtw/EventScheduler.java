@@ -1,14 +1,17 @@
 package de.ostfalia.mobile.orgelhelfer.dtw;
 
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 
 public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
+    private static final String LOG_TAG = EventScheduler.class.getSimpleName();
     private static int REPLAYDELAY = 200;
-	private ArrayList<E> events;
+    private ArrayList<E> events;
 	private int currentIndex;
 
 	private long time;
@@ -40,7 +43,7 @@ public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
 		this.time = time;
 		if(getFollowingIndex(time) <= -1) {
 			running = false;
-            System.out.println("Songe ended");
+            Log.d(LOG_TAG, "Songe ended");
         }
         currentIndex = getFollowingIndex(time);
 		interrupted = true;

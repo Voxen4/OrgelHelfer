@@ -1,10 +1,12 @@
 package de.ostfalia.mobile.orgelhelfer.activitys;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.midi.MidiManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -44,6 +46,7 @@ import de.ostfalia.mobile.orgelhelfer.services.Player;
 
 import static android.widget.AdapterView.OnItemClickListener;
 import static android.widget.AdapterView.OnItemSelectedListener;
+import static de.ostfalia.mobile.orgelhelfer.activitys.SetupActivity.DATEIPFAD_KEY;
 
 public class ConnectActivity extends BaseActivity implements MidiDataManager.OnMidiDataListener {
 
@@ -234,7 +237,8 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
         DialogProperties properties = new DialogProperties();
         properties.selection_mode = DialogConfigs.SINGLE_MODE;
         properties.selection_type = DialogConfigs.FILE_SELECT;
-        properties.root = new File(Environment.getExternalStorageDirectory().getPath() + "/OrgelHelfer");
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        properties.root = new File(preferences.getString(DATEIPFAD_KEY, Environment.getExternalStorageDirectory().getPath() + "/OrgelHelfer"));
         properties.error_dir = new File(DialogConfigs.DEFAULT_DIR);
         properties.offset = new File(DialogConfigs.DEFAULT_DIR);
         properties.extensions = new String[]{"json"};

@@ -13,6 +13,7 @@
     <string name="error_recording_format_exception">Error Loading Recording, Wrong Json Format:</string>
     <string name="error_recording_load">Error Loading Recording:</string>
     <string name="file_select">Select a File</string>
+    <string name="path_select">Select a Path</string>
     <string name="file_select_name">Choose a Filename</string>
     <string name="error_recording_save">Couldn\'t save Json Data</string>
     <string name="error_recording_add_note">Error while adding Note to JSON</string>
@@ -21,4 +22,5 @@
     <string name="neue_kategorie">Neue Kategorie</string>
     <string name="hinzufügen">Hinzufügen</string>
     <string name="verwerfen">Verwerfen</string>
+    <string name="mail_contact">mi.keller@ostfalia.de</string>
 </resources>
