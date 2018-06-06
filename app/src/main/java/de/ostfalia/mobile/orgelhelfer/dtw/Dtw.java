@@ -9,18 +9,22 @@ import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 
+/**
+ * Ein Dtw-Objekt. Kann bis jetzt nur über constructDtw aufgerufen werden.
+ *
+ */
 public class Dtw implements MidiDataManager.OnMidiDataListener {
-    public static final int RECORDINGBUFFERSIZE = 100;
-    public static final int STREAMBUFFERSIZE = 100;
+    private static final int RECORDINGBUFFERSIZE = 100;
+    private static final int STREAMBUFFERSIZE = 100;
     public static final int DELTAREACTIONTIME = 20;
-    public Recording<MidiEvent> rec;
-    public EventScheduler<MidiEvent> scheduler;
-    public StreamBuffer<MidiEvent> streamBuffer;
-    public float[][] matrix;
-    int totalStreamedElements;
-    int minIndex;
+    private Recording<MidiEvent> rec;
+    private EventScheduler<MidiEvent> scheduler;
+    private StreamBuffer<MidiEvent> streamBuffer;
+    private float[][] matrix;
+    private int totalStreamedElements;
+    private int minIndex;
 
-    public Dtw(ArrayList<MidiEvent> recordingList, ArrayList<MidiEvent> talkingEvents) {
+    private Dtw(ArrayList<MidiEvent> recordingList, ArrayList<MidiEvent> talkingEvents) {
         rec = new Recording<>(recordingList, RECORDINGBUFFERSIZE);
         scheduler = new EventScheduler<>(this, talkingEvents);
         streamBuffer = new StreamBuffer<>(STREAMBUFFERSIZE);
@@ -28,22 +32,20 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
         MidiDataManager.getInstance().addOnMidiDataListener(this);
     }
 
+    /**
+     * Diese Methode sortiert alle MidiEvents aus recordingList in zwei Gruppen. 1. Gruppe: Die Events auf die gehört werden soll und die Events die zurückgespielt werden sollen.
+     * Sollte sich die Anforderungen ändern muss diese Methode entsprechen angepasst werden.
+     * @param recordingList : Die gesamtheit aller aufgenommenen MidiEvents. Seine Elemente werden im Verlauf dieser Methode zusätzlich in anderen Listen sortiert oder komplett weggelassen.
+     * @return ein Obejkt des Typs Dtw.
+     */
     public static Dtw constructDTW(List<MidiEvent> recordingList) {
         ArrayList<MidiEvent> retRecordingList = new ArrayList<>();
         ArrayList<MidiEvent> retTalkingList = new ArrayList<>();
         for (int i = 0; i < recordingList.size(); i++) {
-            //if(recordingList.get(i).getmType() == MidiConstants.MessageTypes.STATUS_PROGRAM_CHANGE.getType() || recordingList.get(i).getmType() == MidiConstants.MessageTypes.STATUS_CONTROL_CHANGE.getType()) {
             if (recordingList.get(i).getmType() == MidiConstants.MessageTypes.STATUS_NOTE_ON.getType()) {
-                    //&& recordingList.get(i).getRaw()[1] < 59) {
-
                 retTalkingList.add(recordingList.get(i));
                 retRecordingList.add(recordingList.get(i));
-            } /*else {
-                if (recordingList.get(i).getmType() == MidiConstants.MessageTypes.STATUS_NOTE_ON.getType()) {
-                    //&& recordingList.get(i).getRaw()[2] > 0)
-                    retRecordingList.add(recordingList.get(i));
-                }
-            }*/
+            }
         }
         return new Dtw(retRecordingList, retTalkingList);
     }
@@ -63,9 +65,6 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
         }
         minIndex = minIndexOfCol(streamBuffer.getCurrentIndex());
 
-        //new Auskommentiert
-        //scheduler.setTime(rec.get(minIndex).getTimestamp());
-
         if (minIndex > (int) (RECORDINGBUFFERSIZE * (3f / 4f))) {
             moveMatrix((int) (RECORDINGBUFFERSIZE * (1f / 4f)));
         }
@@ -74,7 +73,7 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
         minIndex = minIndexOfCol(streamBuffer.getCurrentIndex());
     }
 
-    public void redoMatrix() {
+    private void redoMatrix() {
         int x = streamBuffer.getLastIndex();
         for (int i = 0; i < streamBuffer.getCurrentBufferSize(); i++) {
             for (int n = 0; n < rec.getCurrentBufferSize(); n++) {
@@ -100,7 +99,7 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
         this.matrix = newMatrix;
     }
 
-    public int minIndexOfCol(int col) {
+    private int minIndexOfCol(int col) {
         float minValue = Float.MAX_VALUE;
         int minIndex = 0;
         for (int i = 0; i < rec.getCurrentBufferSize(); i++) {
@@ -112,8 +111,8 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
         return minIndex;
     }
 
-    public ArrayList<Float> neighboursOf(int x, int y) {
-        ArrayList<Float> neighbours = new ArrayList<Float>(4);
+    private ArrayList<Float> neighboursOf(int x, int y) {
+        ArrayList<Float> neighbours = new ArrayList<>(4);
 
         if (x > 0 && x != streamBuffer.getCurrentIndex() + 1) {
 
@@ -134,7 +133,7 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
         return neighbours;
     }
 
-    public float min(ArrayList<Float> list) {
+    private float min(ArrayList<Float> list) {
         float min = Float.MAX_VALUE;
         if (list.size() == 0) {
             return 0;

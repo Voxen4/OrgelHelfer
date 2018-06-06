@@ -9,7 +9,7 @@ package de.ostfalia.mobile.orgelhelfer.dtw;
  *
  */
 public class StreamBuffer<E> {
-    public E[] buffer;
+	private E[] buffer;
     private int currentElement = -1;
     private int size;
 	

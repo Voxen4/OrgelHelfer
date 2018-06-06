@@ -2,27 +2,24 @@ package de.ostfalia.mobile.orgelhelfer.dtw;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 
 public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
-    public static int REPLAYDELAY = 200;
-    ArrayList<E> events;
-    int currentIndex;
+    private static int REPLAYDELAY = 200;
+	private ArrayList<E> events;
+	private int currentIndex;
 
-	long time;
+	private long time;
 
-	Dtw dtw;
-	Thread t;
-	boolean started = false;
-	boolean running = false;
-	boolean interrupted = false;
+	private Dtw dtw;
+	private Thread t;
+	private boolean started = false;
+	private boolean running = false;
+	private boolean interrupted = false;
 
-	public EventScheduler(Dtw dtw, ArrayList<E> events) {
+	EventScheduler(Dtw dtw, ArrayList<E> events) {
 		this.dtw = dtw;
 		this.events = events;
 		t = new Thread(this);

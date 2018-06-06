@@ -6,11 +6,10 @@ import java.util.Collections;
 public class Recording<E extends DtwComparable<E>> {
 	private final int maxBufferLength;
 	public int offset;
-	int currentIndex;
-	public ArrayList<E> recordingList;
-	public ArrayList<E> currentSnippet;
+	private ArrayList<E> recordingList;
+	private ArrayList<E> currentSnippet;
 	
-	public Recording(ArrayList<E> recordingList, final int maxBufferLength) {
+	Recording(ArrayList<E> recordingList, final int maxBufferLength) {
 		this.recordingList = recordingList;
 		Collections.sort(recordingList);
 		offset = 0;
@@ -54,7 +53,7 @@ public class Recording<E extends DtwComparable<E>> {
 		return sb.toString();
 	}
 	
-	public int getBestEventIndex(E event, int index) {
+	private int getBestEventIndex(E event, int index) {
 		int ug = index + offset, og = index + offset;
 		if(ug < recordingList.size()) {
 			E currentMinEvent = this.recordingList.get(index + offset);
@@ -102,7 +101,7 @@ public class Recording<E extends DtwComparable<E>> {
 	}
 	
 	private void swap(int index1, int index2) {
-		int lIndex = 0, hIndex = 0;
+		int lIndex,hIndex;
 		if(index1 < index2) {
 			lIndex = index1;
 			hIndex = index2;
@@ -115,16 +114,6 @@ public class Recording<E extends DtwComparable<E>> {
 		}
 		E lElement = recordingList.get(lIndex);
 		E hElement = recordingList.get(hIndex);
-		/*recordingList.remove(hIndex + offset);
-		recordingList.remove(lIndex + offset);
-		recordingList.add(lIndex + offset, hElement);
-		recordingList.add(hIndex + offset, lElement);
-		if(hIndex < getCurrentBufferSize()) {
-			currentSnippet.remove(hIndex);
-			currentSnippet.remove(lIndex);
-			currentSnippet.add(lIndex, hElement);
-			currentSnippet.add(hIndex, lElement);
-		}*/
 		recordingList.remove(hIndex);
 		recordingList.remove(lIndex);
 		recordingList.add(lIndex, hElement);
