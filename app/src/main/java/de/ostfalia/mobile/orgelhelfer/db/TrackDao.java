@@ -11,8 +11,18 @@ import java.util.List;
 @Dao
 public interface TrackDao {
 
+
+    @Query("SELECT * FROM Track")
+    List<Track> getAll();
+
     @Query("SELECT * FROM Track WHERE playlistName LIKE :playlist")
     List<Track> getAllTracks(String playlist);
+
+    @Query("SELECT * FROM Track WHERE kategorieFremdschluessel = :kategorieFremdschluessel")
+    List<Track> loadAllKategorieTracks(int kategorieFremdschluessel);
+
+    @Query("SELECT * FROM Track WHERE playlistFremdschluessel = :playlistFremdschluessel")
+    List<Track> loadAllPlaylistTracks(int playlistFremdschluessel);
 
     @Insert
     void insertAll(List<Track> trackList);
@@ -25,4 +35,6 @@ public interface TrackDao {
 
     @Delete
     void delete(Track track);
+
+
 }

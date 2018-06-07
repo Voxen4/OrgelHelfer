@@ -1,16 +1,19 @@
 package de.ostfalia.mobile.orgelhelfer.db;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiManager;
 import android.os.Environment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.AlteredCharSequence;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
@@ -47,7 +50,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import de.ostfalia.mobile.orgelhelfer.MidiConnectionManager;
@@ -78,6 +83,9 @@ public class Playlist_Tracks extends BaseActivity {
     private static Playlist_Tracks main;
     private static Context context;
     private static ImageView playTrack;
+    private List<Track> tracks;
+    private String[] tracknames;
+    private int playlistUID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,9 +95,19 @@ public class Playlist_Tracks extends BaseActivity {
 
         Bundle dataFromPlaylist = getIntent().getExtras();
         playlist = dataFromPlaylist.getParcelable("playlistName");
+        playlistUID = dataFromPlaylist.getInt("id");
+
+
         playTrack = findViewById(R.id.playTrack);
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                tracks = App.get().getDB().trackDao().getAll();
+                tracknames = new String[tracks.size()];
 
+            }
+        }).start();
 
 
         main = Playlist_Tracks.this;
@@ -112,7 +130,6 @@ public class Playlist_Tracks extends BaseActivity {
 
             }
         });
-
 
 
         //Swipe zum Löschen der Daten!
@@ -142,10 +159,10 @@ public class Playlist_Tracks extends BaseActivity {
             @Override
             public void run() {
                 database = App.get().getDB();
-                data = database.trackDao().getAllTracks(playlist.text);
+                data = database.trackDao().loadAllPlaylistTracks(playlistUID);
                 for (int i = 0; i < data.size(); i++) {
                     try {
-                        adapter.createnewItem(data.get(i).getTrackTitel(),data.get(i).getJsonObject());
+                        adapter.createnewItem(data.get(i).getTrackTitel(), data.get(i).getJsonObject());
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -161,8 +178,67 @@ public class Playlist_Tracks extends BaseActivity {
         }
     }
 
-
     public void loadRecordings(View view) {
+
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(Playlist_Tracks.this);
+
+        final boolean[] checkedColors = new boolean[tracks.size()];
+
+        for (int i = 0; i < tracks.size(); i++) {
+            tracknames[i] = tracks.get(i).getTrackTitel();
+        }
+
+
+        builder.setMultiChoiceItems(tracknames, checkedColors, new DialogInterface.OnMultiChoiceClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                // Update the current focused item's checked status
+                checkedColors[which] = isChecked;
+            }
+        });
+
+        // Set a title for alert dialog
+        builder.setTitle("Lieder in die Playlist hinzufügen?");
+
+        // Set the positive/yes button click listener
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Do something when click positive button
+                for (int i = 0; i<checkedColors.length; i++){
+                    boolean checked = checkedColors[i];
+                    if (checked) {
+                        temp = tracks.get(i);
+                        temp.setPlaylistFremdschluessel(playlistUID);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                database.trackDao().updateOne(temp);
+                                data = database.trackDao().loadAllPlaylistTracks(playlistUID);
+                            }
+                        }).start();
+                  }
+                }
+            }
+        });
+        builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Do something when click the neutral button
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        // Display the alert dialog on interface
+        dialog.show();
+
+
+    }
+
+
+    public void loadRecordings1(View view) {
         DialogProperties properties = new DialogProperties();
         properties.selection_mode = DialogConfigs.SINGLE_MODE;
         properties.selection_type = DialogConfigs.FILE_SELECT;
@@ -195,12 +271,12 @@ public class Playlist_Tracks extends BaseActivity {
                     }
 
                 }
-                adapter.createnewItem(file.getName().substring(0,file.getName().lastIndexOf(46)), jsonObject);
+                adapter.createnewItem(file.getName().substring(0, file.getName().lastIndexOf(46)), jsonObject);
                 final JSONObject finalJsonObject = jsonObject;
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        temp = new Track(file.getName().substring(0,file.getName().lastIndexOf(46)), playlist.text, finalJsonObject.toString());
+                        temp = new Track(file.getName().substring(0, file.getName().lastIndexOf(46)), playlist.text, finalJsonObject.toString());
                         data.add(temp);
                         database.trackDao().insertOne(temp);
                         // Nochmal holen der Datanbank, damit Einträge direkt gelöscht werden können!
@@ -210,12 +286,10 @@ public class Playlist_Tracks extends BaseActivity {
                 }).start();
 
 
-
             }
         });
 
     }
-
 
 
     static class MyItem {
@@ -267,7 +341,7 @@ public class Playlist_Tracks extends BaseActivity {
 
         public void createnewItem(String trackTitle, JSONObject jsonObject) {
 
-            mItems.add(new MyItem(counter,trackTitle, jsonObject));
+            mItems.add(new MyItem(counter, trackTitle, jsonObject));
             counter++;
             main.runOnUiThread(new Runnable() {
                 @Override
@@ -293,7 +367,7 @@ public class Playlist_Tracks extends BaseActivity {
         public void onBindViewHolder(final MyAdapter.MyViewHolder holder, final int position) {
             final MyItem item = mItems.get(position);
             holder.textView.setText(item.text);
-            holder.itemView.setSelected(selectedPos==position);
+            holder.itemView.setSelected(selectedPos == position);
             holder.itemView.setBackgroundResource(selectedPos == position ? R.drawable.markeditem : Color.TRANSPARENT);
 
             holder.containerView.setOnClickListener(new View.OnClickListener() {
@@ -309,7 +383,6 @@ public class Playlist_Tracks extends BaseActivity {
 
                 }
             });
-
 
 
         }
@@ -393,7 +466,6 @@ public class Playlist_Tracks extends BaseActivity {
             }
         }
     }
-
 
 
 }

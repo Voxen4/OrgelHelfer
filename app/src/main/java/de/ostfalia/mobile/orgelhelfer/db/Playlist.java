@@ -17,7 +17,7 @@ public class Playlist{
 
 
     @PrimaryKey(autoGenerate = true)
-    private int uid;
+    private int uuid;
 
     @ColumnInfo(name = "name")
     private String name;
@@ -26,12 +26,12 @@ public class Playlist{
         this.name = name;
     }
 
-    public int getUid() {
-        return uid;
+    public int getUuid() {
+        return uuid;
     }
 
-    public void setUid(int uid) {
-        this.uid = uid;
+    public void setUuid(int uuid) {
+        this.uuid = uuid;
     }
 
     public String getName() {

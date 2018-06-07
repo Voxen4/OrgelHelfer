@@ -8,8 +8,10 @@ import android.arch.persistence.room.PrimaryKey;
 @Entity
 public class Kategorie {
 
+
+
     @PrimaryKey(autoGenerate = true)
-    private int uid;
+    private int kategorieID;
 
 
     @ColumnInfo(name = "name")
@@ -21,12 +23,12 @@ public class Kategorie {
 
     }
 
-    public int getUid() {
-        return uid;
+    public int getKategorieID() {
+        return kategorieID;
     }
 
-    public void setUid(int uid) {
-        this.uid = uid;
+    public void setKategorieID(int kategorieID) {
+        this.kategorieID = kategorieID;
     }
 
     public String getName() {
@@ -40,5 +42,6 @@ public class Kategorie {
     public String toString() {
         return name;
     }
+
 
 }

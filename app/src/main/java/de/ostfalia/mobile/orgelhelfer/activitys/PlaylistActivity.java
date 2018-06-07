@@ -32,6 +32,7 @@ import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractSwipeableItemView
 import java.util.ArrayList;
 import java.util.List;
 
+import de.ostfalia.mobile.orgelhelfer.db.Kategorie;
 import de.ostfalia.mobile.orgelhelfer.db.Playlist_Tracks;
 import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.db.App;
@@ -48,6 +49,7 @@ public class PlaylistActivity extends AppCompatActivity {
     private ImageView erstellen;
 
     public Playlist playlist;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -246,8 +248,9 @@ public class PlaylistActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBindViewHolder(MyAdapter.MyViewHolder holder, int position) {
+        public void onBindViewHolder(final MyAdapter.MyViewHolder holder, final int position) {
             final MyItem item = mItems.get(position);
+
 
             holder.textView.setText(item.text);
 
@@ -255,8 +258,11 @@ public class PlaylistActivity extends AppCompatActivity {
             holder.containerView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Playlist temp = playlistData.get(position);
                     Intent intent = new Intent(v.getContext(), Playlist_Tracks.class);
+
                     intent.putExtra("playlistName", item);
+                    intent.putExtra("id",temp.getUuid());
                     v.getContext().startActivity(intent);
 
                 }

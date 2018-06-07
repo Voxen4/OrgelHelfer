@@ -39,6 +39,9 @@ import de.ostfalia.mobile.orgelhelfer.MidiConnectionManager;
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.MidiEventArrayAdapter;
 import de.ostfalia.mobile.orgelhelfer.R;
+import de.ostfalia.mobile.orgelhelfer.db.App;
+import de.ostfalia.mobile.orgelhelfer.db.MyDatabase;
+import de.ostfalia.mobile.orgelhelfer.db.Track;
 import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
@@ -58,6 +61,8 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
     private Button playButton;
     private boolean recording;
     private JSONObject jsonData;
+
+    private String trackname = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +130,7 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
 
     public void startRecording(View view) {
         final Button recordButton = (Button) view;
+
         if (recording) {
             recording = false;
             runOnUiThread(new Runnable() {
@@ -134,6 +140,8 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
                 }
             });
             showSaveRecordingDialog();
+
+
         } else {
             jsonData = new JSONObject();
             try {
@@ -149,6 +157,7 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
                     recordButton.setText(R.string.stop_recording);
                 }
             });
+
         }
         Log.d(LOG_TAG, "Switched recording state");
     }
@@ -222,6 +231,15 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
         dialogBuilder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 writeMidiJsonExternal(edt.getText().toString());
+                trackname = edt.getText().toString();
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        App.get().getDB().trackDao().insertOne(new Track(trackname,jsonData.toString()));
+                    }
+                }).start();
+
             }
         });
         dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -231,6 +249,7 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
         });
         AlertDialog b = dialogBuilder.create();
         b.show();
+
     }
 
     public void loadRecordings(View view) {
