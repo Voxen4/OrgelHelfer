@@ -181,7 +181,6 @@ public class Playlist_Tracks extends BaseActivity {
     public void loadRecordings(View view) {
 
 
-
         AlertDialog.Builder builder = new AlertDialog.Builder(Playlist_Tracks.this);
 
         final boolean[] checkedColors = new boolean[tracks.size()];
@@ -207,20 +206,19 @@ public class Playlist_Tracks extends BaseActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // Do something when click positive button
-                for (int i = 0; i<checkedColors.length; i++){
-                    boolean checked = checkedColors[i];
-                    if (checked) {
-                        temp = tracks.get(i);
-                        temp.setPlaylistFremdschluessel(playlistUID);
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (int i = 0; i < checkedColors.length; i++) {
+                            boolean checked = checkedColors[i];
+                            if (checked) {
+                                temp = tracks.get(i);
+                                temp.setPlaylistFremdschluessel(playlistUID);
                                 database.trackDao().updateOne(temp);
-                                data = database.trackDao().loadAllPlaylistTracks(playlistUID);
                             }
-                        }).start();
-                  }
-                }
+                        }
+                    }
+                }).start();
             }
         });
         builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
