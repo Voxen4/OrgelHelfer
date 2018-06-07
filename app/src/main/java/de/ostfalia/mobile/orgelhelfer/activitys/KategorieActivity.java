@@ -136,6 +136,7 @@ public class KategorieActivity extends BaseActivity {
                                 database.kategorieDao().insertOne(temp);
                                 // Nochmal holen der Datanbank, damit Einträge direkt gelöscht werden können!
                                 data = database.kategorieDao().getAll();
+                                App.get().getDB().kategorieDao().getAll();
                             }
                         }).start();
 
