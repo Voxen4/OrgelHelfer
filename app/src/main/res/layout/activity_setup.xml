@@ -15,6 +15,8 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:textColor="@color/cardview_light_background"
+        android:fontFamily="sans-serif-smallcaps"
         android:text="Musik"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -29,6 +31,9 @@
         android:layout_alignTop="@+id/textView12"
         android:layout_marginStart="48dp"
         android:layout_marginTop="16dp"
+        android:fontFamily="sans-serif-smallcaps"
+        android:textColorHint="@color/cardview_light_background"
+        android:textColor="@color/cardview_light_background"
         android:ems="10"
         android:hint="Verzögerung(ms)"
         android:inputType="numberSigned"
@@ -39,11 +44,12 @@
         android:id="@+id/textView8"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/textView6"
-        android:layout_below="@+id/textView6"
         android:layout_marginStart="16dp"
         android:layout_marginTop="20dp"
+        android:fontFamily="sans-serif-smallcaps"
         android:text="Musikstücke"
+        android:textColor="@color/cardview_light_background"
+        android:textStyle="bold"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintStart_toStartOf="parent"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintTop_toBottomOf="@+id/kontakt" />
 
@@ -55,7 +61,10 @@
         android:layout_below="@+id/info"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:fontFamily="sans-serif-smallcaps"
         android:text="Kontakt"
+        android:textColor="@color/cardview_light_background"
+        android:textStyle="bold"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintStart_toStartOf="parent"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintTop_toBottomOf="@+id/info" />
 
@@ -66,8 +75,10 @@
         android:layout_alignStart="@+id/speicherort"
         android:layout_below="@+id/dateipfad"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="28dp"
         android:text="Playlist"
+        android:textColor="@color/cardview_light_background"
+        android:textStyle="bold"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintStart_toStartOf="parent"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintTop_toBottomOf="@+id/speicherort" />
 
@@ -80,6 +91,8 @@
         android:layout_alignEnd="@+id/dateipfad"
         android:layout_marginStart="44dp"
         android:layout_marginTop="16dp"
+        android:fontFamily="sans-serif-smallcaps"
+        android:textColor="@color/cardview_light_background"
         android:text="Kontakt-Email"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintStart_toEndOf="@+id/kontakt"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintTop_toBottomOf="@+id/info" />
@@ -93,6 +106,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
         android:text="Informationen"
+        android:textColor="@color/cardview_light_background"
+        android:fontFamily="sans-serif-smallcaps"
         android:textSize="18sp"
         android:textStyle="bold"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintStart_toStartOf="parent"
@@ -106,25 +121,32 @@
         android:layout_below="@+id/musik"
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
+        android:fontFamily="sans-serif-smallcaps"
         android:text="Speicherort"
+        android:textColor="@color/cardview_light_background"
+        android:textStyle="bold"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintStart_toStartOf="parent"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintTop_toBottomOf="@+id/musik" />
 
     <TextView
-        android:id="@+id/textView9"
+        android:id="@+id/anzahlMusikstücke"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textView8"
-        android:layout_alignStart="@+id/textView7"
-        android:layout_marginTop="24dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
+        android:fontFamily="sans-serif-smallcaps"
         android:text="Anzahl der Musikstücke"
-        android.support.constraint.ConstraintLayoutxmlns:layout_constraintTop_toBottomOf="@+id/textView5"
-        tools:layout_editor_absoluteX="109dp" />
+        android:textColor="@color/cardview_light_background"
+        android.support.constraint.ConstraintLayoutxmlns:layout_constraintStart_toEndOf="@+id/textView8"
+        android.support.constraint.ConstraintLayoutxmlns:layout_constraintTop_toBottomOf="@+id/textView5" />
 
     <ListView
         android:id="@id/android:list"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/cardview_light_background"
+        android:fontFamily="sans-serif-smallcaps"
         android:drawSelectorOnTop="false"
         android:scrollbars="vertical" />
 
@@ -134,8 +156,9 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/dateipfad"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="52dp"
         android:layout_toEndOf="@+id/dateipfad"
+        android:fontFamily="sans-serif-smallcaps"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintStart_toEndOf="@+id/dateipfad"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/sym_contact_card" />
@@ -149,6 +172,8 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="64dp"
         android:layout_toEndOf="@+id/speicherort"
+        android:textColor="@color/cardview_light_background"
+        android:fontFamily="sans-serif-smallcaps"
         android:ems="10"
         android:text="Dateipfad"
         android:textAppearance="@android:style/TextAppearance.Material.Small"
@@ -156,23 +181,28 @@
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView13"
+        android:id="@+id/version"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
         android:layout_marginStart="64dp"
+        android:fontFamily="sans-serif-smallcaps"
         android:text="Version"
+        android:textColor="@color/cardview_light_background"
+        android:textStyle="bold"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintBottom_toBottomOf="parent"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/textView14"
+        android:id="@+id/versionAnzeige"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/textView13"
+        android:layout_alignTop="@+id/version"
         android:layout_marginBottom="32dp"
-        android:layout_marginEnd="64dp"
-        android:text="Anzeige der Version"
+        android:layout_marginEnd="180dp"
+        android:fontFamily="sans-serif-smallcaps"
+        android:text="1.0"
+        android:textColor="@color/cardview_light_background"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintBottom_toBottomOf="parent"
         android.support.constraint.ConstraintLayoutxmlns:layout_constraintEnd_toEndOf="parent" />
 </android.support.constraint.ConstraintLayout>
