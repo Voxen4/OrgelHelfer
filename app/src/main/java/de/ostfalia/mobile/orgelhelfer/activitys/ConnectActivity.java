@@ -34,13 +34,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.List;
 
 import de.ostfalia.mobile.orgelhelfer.MidiConnectionManager;
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.MidiEventArrayAdapter;
 import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.db.App;
-import de.ostfalia.mobile.orgelhelfer.db.MyDatabase;
+import de.ostfalia.mobile.orgelhelfer.db.Kategorie;
 import de.ostfalia.mobile.orgelhelfer.db.Track;
 import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
@@ -61,6 +62,7 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
     private Button playButton;
     private boolean recording;
     private JSONObject jsonData;
+    private List<Kategorie> genres;
 
     private String trackname = "";
 
@@ -111,6 +113,14 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
         if (midiRecording != null) {
             playButton.setEnabled(true);
         }
+
+        //Making a room query and setting the result for the ui, really dirty(LiveData or Async better)
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                genres = App.get().getDB().kategorieDao().getAll();
+            }
+        }).start();
     }
 
 
@@ -225,6 +235,12 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
         dialogBuilder.setView(dialogView);
 
         final EditText edt = dialogView.findViewById(R.id.edit1);
+        final Spinner spinnerGenre = dialogView.findViewById(R.id.spinner1);
+        if (genres != null) {
+            final ArrayAdapter<Kategorie> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, genres);
+            arrayAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+            spinnerGenre.setAdapter(arrayAdapter);
+        }
 
         dialogBuilder.setTitle(R.string.file_select_name);
         dialogBuilder.setMessage(getString(R.string.external_folder_saving));
@@ -236,7 +252,15 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        App.get().getDB().trackDao().insertOne(new Track(trackname,jsonData.toString()));
+                        Object selectedKat = spinnerGenre.getSelectedItem();
+                        if (selectedKat != null) {
+                            Track track = new Track(trackname, jsonData.toString());
+                            track.setKategorieFremdschluessel(((Kategorie) selectedKat).getKategorieID());
+                            App.get().getDB().trackDao().insertOne(track);
+                        } else {
+                            App.get().getDB().trackDao().insertOne(new Track(trackname, jsonData.toString()));
+                        }
+
                     }
                 }).start();
 
