@@ -152,7 +152,7 @@ public class SongsActivity extends BaseActivity {
             textView = itemView.findViewById(android.R.id.text1);
             textView.setTextSize(25);
 
-            textView.setTextAppearance(R.style.fontForNotificationLandingPage);
+            textView.setTextAppearance(R.style.textstyle);
         }
 
         @Override
