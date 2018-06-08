@@ -15,21 +15,24 @@ import android.view.View;
 import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.dtw.Dtw;
 
+/**
+ * Displays the StartActivity of the App. Implements the different listeners for the different activities.
+ */
+
 public class StartActivity extends BaseActivity {
 
     private static final String LOG_TAG = StartActivity.class.getSimpleName();
-    private CardView aufnahme, abspielen, genre, einstellungen, playlist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-        aufnahme = findViewById(R.id.aufnahme);
-        abspielen = findViewById(R.id.Abspielen);
-        genre = findViewById(R.id.Genre);
-        einstellungen = findViewById(R.id.Einstellungen);
-        playlist = findViewById(R.id.Playlist);
+        CardView aufnahme = findViewById(R.id.aufnahme);
+        CardView abspielen = findViewById(R.id.Abspielen);
+        CardView genre = findViewById(R.id.Genre);
+        CardView einstellungen = findViewById(R.id.Einstellungen);
+        CardView playlist = findViewById(R.id.Playlist);
 
         aufnahme.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,6 +78,9 @@ public class StartActivity extends BaseActivity {
 
     }
 
+    /**
+     * checks the permissions of the app
+     */
     private void checkPermissions() {
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this,
@@ -98,6 +104,11 @@ public class StartActivity extends BaseActivity {
 
     }
 
+    /**
+     * Shows if midi is not supported
+     * @param cancelable
+     * @return
+     */
     public AlertDialog noMidiSupportAlert(boolean cancelable) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setCancelable(cancelable);
