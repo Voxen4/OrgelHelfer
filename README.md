@@ -29,4 +29,4 @@ entwickelt werden würde, mit dem Unterschied, dass es eine Funktion zum automat
 Die App wurde bewusst simpel aufgebaut, da der Organist im fortgeschrittenen Alter ist. 
 
 ### Main Activity
-![alt text](https://imgur.com/a/VmtqXz2)
+![alt text](http://imgur.com/a/VmtqXz2)
