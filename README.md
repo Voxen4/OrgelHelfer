@@ -29,7 +29,7 @@ entwickelt werden würde, mit dem Unterschied, dass es eine Funktion zum automat
 Die App wurde bewusst simpel aufgebaut, da der Organist im fortgeschrittenen Alter ist. 
 
 ### Main Activity
-![Main](https://ibb.co/f3SYL8)
+![Main](OrgelHelfer/Images/Screenshot_1528454697.png?raw=true "Title")
 
 ### Connect Activity
 
