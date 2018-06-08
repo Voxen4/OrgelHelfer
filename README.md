@@ -30,3 +30,12 @@ Die App wurde bewusst simpel aufgebaut, da der Organist im fortgeschrittenen Alt
 
 ### Main Activity
 ![Main](https://ibb.co/f3SYL8)
+
+### Connect Activity
+
+### Playlist Activty
+
+### Setup Activity
+
+### Kategorie Activity
+
