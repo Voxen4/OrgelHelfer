@@ -194,6 +194,13 @@ public class Playlist_Tracks extends BaseActivity {
                                 temp = tracks.get(i);
                                 temp.setPlaylistFremdschluessel(playlistUID);
                                 database.trackDao().updateOne(temp);
+                                try {
+                                    adapter.createnewItem(temp.getTrackTitel(),temp.getJsonObject());
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+
                             }
                         }
                     }
