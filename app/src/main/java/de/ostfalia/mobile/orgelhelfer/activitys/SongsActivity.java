@@ -1,16 +1,27 @@
 package de.ostfalia.mobile.orgelhelfer.activitys;
+/*
+ *    Copyright (C) 2016 Haruki Hasegawa
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Color;
+
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,6 +36,8 @@ import com.h6ah4i.android.widget.advrecyclerview.swipeable.annotation.SwipeableI
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.annotation.SwipeableItemResults;
 import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractSwipeableItemViewHolder;
 
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,127 +45,92 @@ import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.db.App;
 import de.ostfalia.mobile.orgelhelfer.db.Kategorie;
 import de.ostfalia.mobile.orgelhelfer.db.MyDatabase;
+import de.ostfalia.mobile.orgelhelfer.db.Track;
+import de.ostfalia.mobile.orgelhelfer.dtw.Dtw;
+import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
 
-public class KategorieActivity extends BaseActivity {
+
+public class SongsActivity extends BaseActivity {
 
     private static long counter = 0;
-    public static List<Kategorie> data;
+    private static int kategorieID;
+    public List<Kategorie> data;
+    public List<Track> dataTrack;
+    public boolean flag = true;
+    ImageView playTrack;
     private MyDatabase database;
     private MyAdapter adapter = null;
-    private Kategorie temp;
-
-
+    private Track temp;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
-
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_kategorie);
+        Bundle extras = getIntent().getExtras();
+        System.out.println(extras.getInt("ID"));
+        kategorieID = extras.getInt("ID");
+        System.out.println("KatID onCreate" + kategorieID);
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerview);
-        ImageView addItem = findViewById(R.id.kategorieHinzufügen);
+        setContentView(R.layout.activity_song);
 
-        android.support.v7.widget.Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setBackgroundColor(Color.TRANSPARENT);
-
-
-
-
-        RecyclerViewSwipeManager swipeMgr = new RecyclerViewSwipeManager();
+        RecyclerView recyclerView = findViewById(R.id.songsKategorie);
+        playTrack = findViewById(R.id.playTrack);
+        RecyclerViewSwipeManager expMgr = new RecyclerViewSwipeManager();
 
 
-        //Swipe zum Löschen der Daten!
-        swipeMgr.setOnItemSwipeEventListener(new RecyclerViewSwipeManager.OnItemSwipeEventListener() {
+        expMgr.setOnItemSwipeEventListener(new RecyclerViewSwipeManager.OnItemSwipeEventListener() {
             public void onItemSwipeStarted(int position) {
             }
 
             public void onItemSwipeFinished(int position, int result, int afterSwipeReaction) {
 
                 if (result == 4 || result == 2) {
-                    temp = data.get(position);
-                    data.remove(position);
+                    temp = dataTrack.get(position);
+                    dataTrack.remove(position);
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            database.kategorieDao().delete(temp);
+                            database.trackDao().delete(temp);
                         }
                     }).start();
                 }
 
             }
         });
-
-
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
 
         adapter = new MyAdapter();
 
-        // Erstellen der Datenbank bei Öffnen der Activity
         new Thread(new Runnable() {
             @Override
             public void run() {
                 database = App.get().getDB();
                 data = database.kategorieDao().getAll();
-                for (int i = 0; i < data.size(); i++) {
-                    adapter.createnewItem(data.get(i).getName());
+                dataTrack = database.trackDao().loadAllKategorieTracks(kategorieID);
+                System.out.println(data);
+                System.out.println(kategorieID);
+                for (int i = 0; i < dataTrack.size(); i++) {
+                    System.out.println(dataTrack.get(i));
+                    adapter.createnewItem(dataTrack.get(i).getTrackTitel());
                 }
             }
+
         }).start();
 
-        recyclerView.setAdapter(swipeMgr.createWrappedAdapter(adapter));
+
+        recyclerView.setAdapter(expMgr.createWrappedAdapter(adapter));
 
 
-        swipeMgr.attachRecyclerView(recyclerView);
+        expMgr.attachRecyclerView(recyclerView);
 
-        // Hinzufügen der Items in das Recyclerview
-        addItem.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-
-                AlertDialog.Builder alert = new AlertDialog.Builder(KategorieActivity.this);
-                final EditText edittext = new EditText(KategorieActivity.this);
-                edittext.setMaxLines(1);
-                edittext.setInputType(1);
-
-
-                alert.setTitle(R.string.neue_kategorie);
-
-                alert.setView(edittext);
-
-                alert.setPositiveButton(R.string.hinzufügen, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        adapter.createnewItem(edittext.getText().toString());
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                temp = new Kategorie(edittext.getText().toString());
-                                data.add(temp);
-                                database.kategorieDao().insertOne(temp);
-                                // Nochmal holen der Datanbank, damit Einträge direkt gelöscht werden können!
-                                data = database.kategorieDao().getAll();
-                                App.get().getDB().kategorieDao().getAll();
-                            }
-                        }).start();
-
-                    }
-                });
-
-                alert.setNegativeButton(R.string.verwerfen, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        // what ever you want to do with No option.
-                    }
-                });
-
-                alert.show();
-
-
-            }
-        });
     }
 
+    public void playSongMethode(View view) {
+        if (ConnectActivity.midiRecording != null) {
+            Dtw dtw = Dtw.constructDTW(ConnectActivity.midiRecording.getRecordingList());
+        }
+    }
 
     static class MyItem {
         public final long id;
@@ -174,7 +152,7 @@ public class KategorieActivity extends BaseActivity {
             textView = itemView.findViewById(android.R.id.text1);
             textView.setTextSize(25);
 
-            textView.setTextAppearance(R.style.textstyle);
+            textView.setTextAppearance(R.style.fontForNotificationLandingPage);
         }
 
         @Override
@@ -185,7 +163,6 @@ public class KategorieActivity extends BaseActivity {
 
     static class MyAdapter extends RecyclerView.Adapter<MyViewHolder> implements SwipeableItemAdapter<MyViewHolder> {
         List<MyItem> mItems;
-        public long KategorieIDUebergabe = 0;
 
         public MyAdapter() {
             setHasStableIds(true); // this is required for swiping feature.
@@ -209,20 +186,27 @@ public class KategorieActivity extends BaseActivity {
             return new MyViewHolder(v);
         }
 
+        //Ändern des ausgewählten songs
         @Override
-        public void onBindViewHolder(final MyViewHolder holder, final int position) {
-            final MyItem item = mItems.get(position);
-
-
+        public void onBindViewHolder(MyViewHolder holder, final int position) {
+            MyItem item = mItems.get(position);
             holder.textView.setText(item.text);
-
             holder.containerView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Kategorie temp2 = data.get(position);
-                    Intent intent = new Intent(v.getContext(), SongsActivity.class);
-                    intent.putExtra("ID", temp2.getKategorieID());
-                    v.getContext().startActivity(intent);
+                    System.out.println();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                ConnectActivity.midiRecording = MidiRecording.createRecordingFromJson(App.get().getDB().trackDao().loadAllKategorieTracks(kategorieID).get(position).getJsonObject());
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+
 
                 }
             });
@@ -240,7 +224,7 @@ public class KategorieActivity extends BaseActivity {
 
         @Override
         public SwipeResultAction onSwipeItem(MyViewHolder holder, int position, @SwipeableItemResults int result) {
-            if (result == Swipeable.RESULT_CANCELED) {
+            if (result == MyAdapter.Swipeable.RESULT_CANCELED) {
                 return new SwipeResultActionDefault();
             } else {
                 return new MySwipeResultActionRemoveItem(this, position);
@@ -249,7 +233,7 @@ public class KategorieActivity extends BaseActivity {
 
         @Override
         public int onGetSwipeReactionType(MyViewHolder holder, int position, int x, int y) {
-            return Swipeable.REACTION_CAN_SWIPE_BOTH_H;
+            return MyAdapter.Swipeable.REACTION_CAN_SWIPE_BOTH_H;
         }
 
         @Override

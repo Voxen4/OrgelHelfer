@@ -40,6 +40,12 @@
             android:name=".activitys.BaseActivity"
             android:screenOrientation="portrait"
             android:theme="@style/textstyle"/>
+
+
+        <activity
+            android:name=".activitys.SongsActivity"
+            android:screenOrientation="portrait" />
+
         <activity
             android:name=".activitys.KategorieActivity"
             android:screenOrientation="portrait" />

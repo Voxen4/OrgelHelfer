@@ -257,6 +257,7 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
                         if (selectedKat != null) {
                             Track track = new Track(trackname, jsonData.toString());
                             track.setKategorieFremdschluessel(((Kategorie) selectedKat).getKategorieID());
+                            System.out.println("ID auswahl " + ((Kategorie) selectedKat).getKategorieID());
                             App.get().getDB().trackDao().insertOne(track);
                         } else {
                             App.get().getDB().trackDao().insertOne(new Track(trackname, jsonData.toString()));
