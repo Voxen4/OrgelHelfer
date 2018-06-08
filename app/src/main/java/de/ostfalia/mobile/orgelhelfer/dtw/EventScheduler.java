@@ -8,6 +8,12 @@ import java.util.ArrayList;
 import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 
+/**
+ * Der EventScheduler ist ein Objekt dass sich um das zeitlich richtige Absenden von Events kümmert.
+ * Alle Events die von diesem Objekt gesendet werden, werden außerdem zurück an das Dtw-Objekt gesendet um einen erneuten Einstieg
+ * ermöglichen zu können.
+ * @param <E> : Eine Klasse die das Interface DtwComparable implemeniert.
+ */
 public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
     private static final String LOG_TAG = EventScheduler.class.getSimpleName();
     private static int REPLAYDELAY = 200;
@@ -22,12 +28,21 @@ public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
 	private boolean running = false;
 	private boolean interrupted = false;
 
+	/**
+	 * Erstellt ein neues Objekt des Typs EventScheduler.
+	 * @param dtw : Das Dtw-Objekt, an den die gesendeten Daten übermittelt werden um die neuste Position zu errechnen.
+	 * @param events : Die Liste der Events die abgepielt werden sollen (wenn sie nicht übersprungen werden)
+	 */
 	EventScheduler(Dtw dtw, ArrayList<E> events) {
 		this.dtw = dtw;
 		this.events = events;
 		t = new Thread(this);
 	}
 
+	/**
+	 * Gibt zurück, ob der EventScheduler gestartet wurde.
+	 * @return
+	 */
 	public boolean hasStarted() {
 		return started;
 	}
@@ -39,6 +54,10 @@ public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
 		t.start();
 	}
 
+	/**
+	 * Setzt eine neue Zeit für den EventScheduler.
+	 * @param time . Der Zeitpunkt an dem das letzte MidiEvent vom Benutzer empfangen wurde.
+	 */
 	public void setTime(long time) {
 		this.time = time;
 		if(getFollowingIndex(time) <= -1) {
@@ -50,6 +69,11 @@ public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
 		t.interrupt();
 	}
 
+	/**
+	 * Gibt den Index des nächsten Elements das gespielt werden soll zurück.
+	 * @param time :
+	 * @return das erste Element aus der Liste events für das gilt event.getTimestamp() > time
+	 */
 	private int getFollowingIndex(long time) {
 		int i = 0;
 		while(i < events.size() && events.get(i).getTimestamp() <= time) {
@@ -82,6 +106,10 @@ public class EventScheduler<E extends DtwComparable<E>> implements Runnable {
         System.out.println("Song ended");
     }
 
+	/**
+	 * Sendent ein Event e (MidiEvent) an den MidiDataManager
+	 * @param event : Das Event dass vom Gerät abgespielt werden soll.
+	 */
 	private void sendEvent(E event) {
 		if(event instanceof MidiEvent) {
 			MidiEvent e = (MidiEvent) event;

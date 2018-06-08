@@ -1,48 +1,73 @@
 package de.ostfalia.mobile.orgelhelfer.dtw;
 
 /**
- * StreamBuffer-Klasse //TODO: besserer Name. Ist n�mlich kein Buffer
- * Diese Klasse ist eine eigene Datenstruktur die die letzten bufferLength Elemente speichert.
- * Wurden insgesamt mehr als bufferLength Elemente hinzugef�gt, so werden die ersten Elemente aus dem Array der Reihe nach �berschrieben.
- * Das zurzeit zuletzt hinzugef�gte Element befindet sich an der position von currentElement.
+ * Die StreamBuffer Klasse speichert die letzten bufferLength Elemente in einem Array.
+ * Sollte das Array voll sein wird das erste zugefügt Element überschrieben.
  * @author Aaron
  *
  */
 public class StreamBuffer<E> {
 	private E[] buffer;
-    private int currentElement = -1;
+	// Zeigt dauerhaft das auf zuletzt hinzugefügte Element.
+    private int currentIndex = -1;
+    // Ist immer <= bufferLength.
     private int size;
-	
+
+	/**
+	 * Erzeugt ein neues StreamBufferObjekt mit einer festen länge bufferLength-
+	 * @param bufferLength : Die Maximallänge des Buffers.
+	 */
 	@SuppressWarnings("unchecked")
 	StreamBuffer(final int bufferLength) {
 		size = 0;
 		buffer = (E[]) new Object[bufferLength];
 	}
-	
+
+	/**
+	 * Fügt ein Element dem Buffer hinzu.
+	 * @param element : Das Element dass hinzugefügt werden soll.
+	 */
 	public void addElement(E element) {
 		size++;
 		if(size > buffer.length) {
 			size = buffer.length;
 		}
-		currentElement = (currentElement + 1) % buffer.length;
-		buffer[currentElement] = element;
+		currentIndex = (currentIndex + 1) % buffer.length;
+		buffer[currentIndex] = element;
 	}
-	
+
+	/**
+	 * Gibt den Index des zuletzt hinzugefügten Elements zurück.
+	 * @return
+	 */
 	public int getCurrentIndex() {
-		return currentElement;
+		return currentIndex;
 	}
-	
+
+	/**
+	 * Gibt den Index des zuert hinzugefügten Elements zurück.
+	 * @return
+	 */
 	public int getLastIndex() {
 		if(size > buffer.length) {
-			return (currentElement + 1) % buffer.length;
+			return (currentIndex + 1) % buffer.length;
 		}
 		return 0;
 	}
-	
+
+	/**
+	 * Gibt das Element an dem übergebenen index zurück.
+	 * @param index : Index es zurückgegebenen Elements
+	 * @return ein Element an der Stelle index.
+	 */
 	public E get(int index) {
 		return buffer[index];
 	}
-	
+
+	/**
+	 * Gibt die Anzahl der gespeicherten Element im Buffer zurück. Die zurückgegebene Zahl ist dauerhaft <= bufferLength.
+	 * @return : Anzahl der im Buffer gespeicherten Elemente.
+	 */
 	public int getCurrentBufferSize() {
 		return size;
 	}
@@ -53,7 +78,7 @@ public class StreamBuffer<E> {
 		for(int i = 0; i < buffer.length && buffer[i] != null; i++) {
 			sb.append(buffer[i].toString());
 			sb.append((char) 9);
-			if(i == currentElement) {
+			if(i == currentIndex) {
 				sb.append("|");
 				sb.append((char) 9);
 			}

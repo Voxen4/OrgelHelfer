@@ -11,7 +11,8 @@ import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 
 /**
  * Ein Dtw-Objekt. Kann bis jetzt nur über constructDtw aufgerufen werden.
- *
+ * Mit jedem aufruf von onMidiEvent(MidiEvent e) wird der beste Pfad auf einer Matrix errechnet und der zurzeit beste Zeitpunkt
+ * an den EventScheduler übertragen.
  */
 public class Dtw implements MidiDataManager.OnMidiDataListener {
     private static final int RECORDINGBUFFERSIZE = 100;
@@ -24,6 +25,12 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
     private int totalStreamedElements;
     private int minIndex;
 
+    /**
+     * Konstruiert ein Dtw-Objekt.
+     * @param recordingList : Die Events (sortiert nach getTimestamp())die während des eigentlchen Spielens zur
+     *                      Berechnung des optimalen Pfads genutzt werden sollen.
+     * @param talkingEvents : Die Events (...) die während des Spielens zurückgespielt werden sollen.
+     */
     private Dtw(ArrayList<MidiEvent> recordingList, ArrayList<MidiEvent> talkingEvents) {
         rec = new Recording<>(recordingList, RECORDINGBUFFERSIZE);
         scheduler = new EventScheduler<>(this, talkingEvents);
@@ -50,6 +57,12 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
         return new Dtw(retRecordingList, retTalkingList);
     }
 
+    /**
+     * Berechnet den besten Pfad zwischen recordingList und allen bisher in dierer Methode übergebenen Events.
+     * Das zurzeit beste Element kann durch rec.get(minimumIndex) bekommen werden.
+     * Diese Methode wird zusätlich vom EventScheduler augerufen wenn dieser einen Ton zurückspielt.
+     * @param event : Das Event das gespielt wurde.
+     */
     public void next(MidiEvent event) {
         if (!scheduler.hasStarted()) {
             scheduler.start(rec.get(0).getTimestamp());
@@ -59,7 +72,6 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
         for (int i = 0; i < rec.getCurrentBufferSize(); i++) {
             matrix[streamBuffer.getCurrentIndex()][i] = event.dtwCompareTo(rec.get(i)) + min(neighboursOf(streamBuffer.getCurrentIndex(), i));
         }
-        //TODO: WAS ist wenn es mehrere minIndexe gibt?
         if (rec.lookForBetterEvents(event, minIndex + 1)) {
             redoMatrix();
         }
@@ -73,6 +85,9 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
         minIndex = minIndexOfCol(streamBuffer.getCurrentIndex());
     }
 
+    /**
+     * Berechnet den jetzigen Teilausschnitt des Pfads neu.
+     */
     private void redoMatrix() {
         int x = streamBuffer.getLastIndex();
         for (int i = 0; i < streamBuffer.getCurrentBufferSize(); i++) {
@@ -84,6 +99,10 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
         }
     }
 
+    /**
+     * Bew
+     * @param amount
+     */
     private void moveMatrix(int amount) {
         System.out.println("------------MATRIX VERSCHOBEN UM: " + amount + "------------");
         rec.moveCurrentSnippet(amount);
@@ -98,6 +117,7 @@ public class Dtw implements MidiDataManager.OnMidiDataListener {
         }
         this.matrix = newMatrix;
     }
+
 
     private int minIndexOfCol(int col) {
         float minValue = Float.MAX_VALUE;

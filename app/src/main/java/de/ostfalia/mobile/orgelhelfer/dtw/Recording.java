@@ -3,6 +3,7 @@ package de.ostfalia.mobile.orgelhelfer.dtw;
 import java.util.ArrayList;
 import java.util.Collections;
 
+
 public class Recording<E extends DtwComparable<E>> {
 	private final int maxBufferLength;
 	public int offset;
@@ -19,7 +20,12 @@ public class Recording<E extends DtwComparable<E>> {
 			currentSnippet.add(recordingList.get(i));
 		}
 	}
-	
+
+	/**
+	 * Gibt das Element an der Stelle Index des jetzigen Ausschnittes zurück.
+	 * @param index : der Index des Elements
+	 * @return das Element an der Stelle index
+	 */
 	public E get(int index) {
 		return currentSnippet.get(index);
 	}
@@ -27,11 +33,19 @@ public class Recording<E extends DtwComparable<E>> {
 	public int getMaxBufferLength() {
 		return maxBufferLength;
 	}
-	
+
+	/**
+	 * Gibt die länge des jetzigen Ausschnittes zurück. Ist dauerhaft <= maxBufferLength
+	 * @return die länge des jezigen Ausschnittes
+	 */
 	public int getCurrentBufferSize() {
 		return currentSnippet.size();
 	}
-	
+
+	/**
+	 * Bewegt die jetzigen Auschnitt der Aufnahme um amount.
+	 * @param amount Die Richtung und Distanz der Bewegung.
+	 */
 	public void moveCurrentSnippet(int amount) {
 		offset += amount;
 		if(offset < 0 || offset >= maxBufferLength) {
@@ -87,7 +101,15 @@ public class Recording<E extends DtwComparable<E>> {
 		}
 		return index + offset;
 	}
-	
+
+	/**
+	 * Prüt ob innerhalb eines festen Zeitfensters (Dtw.DELTAREACTIONTIME) um das Element rec.get(index) ein anderes MidiEvent existiert für das gilt:
+	 * MidiEvent e = rec.get(index).dtwComparable(event) == 0 (der Typ und der Pitch der MidiEvens ist gleich)
+	 * Wenn ein besseres Event wird die methode swap() aufgerufen.
+	 * @param event : Das Event dass gespielt wurde.
+	 * @param index : Der Index des Elements mit der zurzeit besten Assoziation mit event
+	 * @return true, wenn ein besseres Element gefunden und die Elemente vertauscht wurden, sost false
+	 */
 	public boolean lookForBetterEvents(E event, int index) {
 		int j = getBestEventIndex(event, index);
 		int i = offset + index;
@@ -99,7 +121,12 @@ public class Recording<E extends DtwComparable<E>> {
 			return false;
 		}
 	}
-	
+
+	/**
+	 * Vertauscht die Position der Elemente an den Stellen index1 und index2 sowohl in recordingList als auch in currentSnippet.
+	 * @param index1 : Index des ersten ELements.
+	 * @param index2 : Index des zweiten Elements.
+	 */
 	private void swap(int index1, int index2) {
 		int lIndex,hIndex;
 		if(index1 < index2) {
