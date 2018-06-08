@@ -30,9 +30,9 @@ Die App wurde bewusst simpel aufgebaut, da der Organist im fortgeschrittenen Alt
 
 ### Main Activity
 <img src="Images/Main_Activity.png" width="300" heigth="300">
-Die Main Activity ist nur zum Weiterleiten auf die jeweiligen Menüpunkte gedacht.
+Die Main Activity ist nur zum Weiterleiten auf die jeweiligen Menüpunkte gedacht. Der Button "Abspielen" ist für den Algorithmus gedacht. Dazu muss zuerst in der Aufnahme Kategorie der Song geladen werden und darüber dann abgespielt werden.
 
-### Abspielen Activity(Connect Activity)
+### Aufnahme Activity(Connect Activity)
 <img src="Images/Connect_Activity.gif" width="300" heigth="300">
 In der Abspiel Activity werden die einzelnen Songs aufgenommen und einer Kategorie zugeordnet. Unter den drei Buttons werden die jeweiligen Noten angezeigt, die beim Spielen auf dem Keyboard übertragen werden. Um einen einzelnen Song abzuspielen, wird über "Load Song" der Song geladen und über "Play" dann abgespielt.(Der Algorithmus greift hier nicht)
 
