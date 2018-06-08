@@ -21,5 +21,6 @@
     android:gravity="center_vertical"
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-    android:textAppearance="@style/textstyle" />
+    android:textAppearance="@style/textstyle"
+    android:textSize="10sp" />
 

@@ -52,7 +52,7 @@ import static android.widget.AdapterView.OnItemClickListener;
 import static android.widget.AdapterView.OnItemSelectedListener;
 import static de.ostfalia.mobile.orgelhelfer.activitys.SetupActivity.DATEIPFAD_KEY;
 
-public class ConnectActivity extends BaseActivity implements MidiDataManager.OnMidiDataListener {
+public class ConnectActivity extends BaseActivity implements MidiDataManager.OnMidiDataListener, Player.SongStateCallback {
 
     private static final String LOG_TAG = ConnectActivity.class.getSimpleName();
     public static MidiRecording midiRecording;
@@ -63,7 +63,7 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
     private boolean recording;
     private JSONObject jsonData;
     private List<Kategorie> genres;
-
+    private ConnectActivity thizClazz;
     private String trackname = "";
 
     @Override
@@ -121,6 +121,7 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
                 genres = App.get().getDB().kategorieDao().getAll();
             }
         }).start();
+        thizClazz = this;
     }
 
 
@@ -333,24 +334,25 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
             public void onClick(View v) {
                 if (Player.IsRecordingPlaying()) {
                     Player.setIsRecordingPlaying(false);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            playButton.setText(R.string.Play);
-                        }
-                    });
                 } else {
-                    Player.playRecording(midiRecording, null);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            playButton.setText(R.string.Stop);
-                        }
-                    });
+                    Player.playRecording(midiRecording, thizClazz);
                 }
             }
         });
     }
 
 
+    @Override
+    public void songStateChanged(final Player.SongState state) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (state == Player.SongState.PLAYING) {
+                    playButton.setText(R.string.Stop);
+                } else {
+                    playButton.setText(R.string.Play);
+                }
+            }
+        });
+    }
 }

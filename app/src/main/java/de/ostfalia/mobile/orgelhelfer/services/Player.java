@@ -19,15 +19,22 @@ public class Player {
     private static final String LOG_TAG = Player.class.getSimpleName();
     private static boolean IS_RECORDING_PLAYING = false;
 
-    public static void playRecording(final MidiRecording recording, final SongStateCallback callback) {
-
-
+    public synchronized static void playRecording(final MidiRecording recording, final SongStateCallback callback, final int startDelay) {
         Log.d(LOG_TAG, "Start Playing the Recording");
-        IS_RECORDING_PLAYING = true;
-        notifyCallback(callback, SongState.PLAYING);
+
         new Thread(new Runnable() {
             @Override
             public void run() {
+                if (startDelay != 0) {
+                    try {
+                        Thread.sleep(startDelay);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        Log.d(LOG_TAG, "Exception while delaying Playing: " + e.toString());
+                    }
+                }
+                IS_RECORDING_PLAYING = true;
+                notifyCallback(callback, SongState.PLAYING);
                 List<MidiEvent> notes = recording.getRecordingList();
                 long lastTimestamp = 0;
                 long nextTimestamp = 0;
@@ -57,24 +64,23 @@ public class Player {
                     }
 
                 }
-                notifyCallback(callback, SongState.STOPPED);
                 IS_RECORDING_PLAYING = false;
+                notifyCallback(callback, SongState.STOPPED);
+
             }
         }).
 
                 start();
     }
+    public static void playRecording(final MidiRecording recording, final SongStateCallback callback) {
+        playRecording(recording, callback, 0);
+    }
 
     private static void notifyCallback(SongStateCallback callback, SongState state) {
-        if (callback != null) callback.songStateChanged(state);
-    }
-
-    public enum SongState {
-        PLAYING, STOPPED
-    }
-
-    interface SongStateCallback {
-        void songStateChanged(SongState state);
+        if (callback != null) {
+            Log.d(LOG_TAG, "New Player State " + state.toString());
+            callback.songStateChanged(state);
+        }
     }
 
     public static boolean IsRecordingPlaying() {
@@ -83,5 +89,13 @@ public class Player {
 
     public static void setIsRecordingPlaying(boolean _is) {
         IS_RECORDING_PLAYING = _is;
+    }
+
+    public enum SongState {
+        PLAYING, STOPPED
+    }
+
+    public interface SongStateCallback {
+        void songStateChanged(SongState state);
     }
 }

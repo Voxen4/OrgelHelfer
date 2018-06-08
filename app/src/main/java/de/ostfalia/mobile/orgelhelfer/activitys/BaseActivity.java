@@ -48,7 +48,7 @@ public class BaseActivity extends AppCompatActivity implements MidiConnectionMan
     @Override
     public void onDevicesChanged() {
         devices = getMidiDevices();
-        if (MidiConnectionManager.getInstance().getInputPort() != null) {
+        if (MidiConnectionManager.getInstance().getInputPort() != null && !devices.isEmpty()) {
             MidiConnectionManager.getInstance().connectToDevice(devices.get(0));
         }
     }

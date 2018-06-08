@@ -2,13 +2,12 @@ package de.ostfalia.mobile.orgelhelfer.db;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,10 +15,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.github.angads25.filepicker.controller.DialogSelectionListener;
-import com.github.angads25.filepicker.model.DialogConfigs;
-import com.github.angads25.filepicker.model.DialogProperties;
-import com.github.angads25.filepicker.view.FilePickerDialog;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemConstants;
@@ -33,10 +28,6 @@ import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractSwipeableItemView
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -222,59 +213,6 @@ public class Playlist_Tracks extends BaseActivity {
     }
 
 
-    public void loadRecordings1(View view) {
-        DialogProperties properties = new DialogProperties();
-        properties.selection_mode = DialogConfigs.SINGLE_MODE;
-        properties.selection_type = DialogConfigs.FILE_SELECT;
-        properties.root = new File(Environment.getExternalStorageDirectory().getPath() + "/OrgelHelfer");
-        properties.error_dir = new File(DialogConfigs.DEFAULT_DIR);
-        properties.offset = new File(DialogConfigs.DEFAULT_DIR);
-        properties.extensions = new String[]{"json"};
-        final FilePickerDialog dialog = new FilePickerDialog(this, properties);
-        dialog.setTitle("Datei auswählen");
-        dialog.show();
-        dialog.setDialogSelectionListener(new DialogSelectionListener() {
-            @Override
-            public void onSelectedFilePaths(String[] files) {
-                final File file = new File(files[0]);
-                JSONObject jsonObject = null;
-                if (file.exists()) {
-                    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                        StringBuilder jsonString = new StringBuilder();
-                        while (reader.ready()) {
-                            String line = reader.readLine();
-                            jsonString.append(line);
-                        }
-                        jsonObject = new JSONObject(jsonString.toString());
-                    } catch (IOException e) {
-                        Log.d(LOG_TAG, "Error Loading Recording: " + e.toString());
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        Log.d(LOG_TAG, "Error Loading Recording Wrong Json Format: " + e.toString());
-                        e.printStackTrace();
-                    }
-
-                }
-                adapter.createnewItem(file.getName().substring(0, file.getName().lastIndexOf(46)), jsonObject);
-                final JSONObject finalJsonObject = jsonObject;
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        temp = new Track(file.getName().substring(0, file.getName().lastIndexOf(46)), playlist.text, finalJsonObject.toString());
-                        data.add(temp);
-                        database.trackDao().insertOne(temp);
-                        // Nochmal holen der Datanbank, damit Einträge direkt gelöscht werden können!
-                        data = database.trackDao().getAllTracks(playlist.text);
-
-                    }
-                }).start();
-
-
-            }
-        });
-
-    }
-
 
     static class MyItem {
         public final long id;
@@ -291,13 +229,17 @@ public class Playlist_Tracks extends BaseActivity {
     }
 
 
-    static class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> implements SwipeableItemAdapter<MyAdapter.MyViewHolder> {
+    static class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> implements SwipeableItemAdapter<MyAdapter.MyViewHolder>, Player.SongStateCallback {
         List<MyItem> mItems;
+        MyAdapter thizAdapter;
         private int selectedPos = RecyclerView.NO_POSITION;
+        private int playlistCounter;
+        private MyViewHolder holder;
 
         public MyAdapter() {
             setHasStableIds(true); // this is required for swiping feature.
             mItems = new ArrayList<>();
+            thizAdapter = this;
         }
 
         public void createnewItem(String trackTitle, JSONObject jsonObject) {
@@ -334,7 +276,6 @@ public class Playlist_Tracks extends BaseActivity {
             holder.containerView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
                     if (holder.getAdapterPosition() == RecyclerView.NO_POSITION) return;
 
                     notifyItemChanged(selectedPos);
@@ -349,6 +290,11 @@ public class Playlist_Tracks extends BaseActivity {
         }
 
         private void setRecording(JSONObject recordingJson) {
+            setRecording(recordingJson, 0);
+
+        }
+
+        private void setRecording(JSONObject recordingJson, final int sleepTimer) {
             midiRecording = MidiRecording.createRecordingFromJson(recordingJson);
             playTrack.setEnabled(true);
             Player.setIsRecordingPlaying(false);
@@ -365,7 +311,7 @@ public class Playlist_Tracks extends BaseActivity {
                             }
                         });
                     } else {
-                        Player.playRecording(midiRecording, null);
+                        Player.playRecording(midiRecording, thizAdapter, sleepTimer);
                         main.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -375,7 +321,6 @@ public class Playlist_Tracks extends BaseActivity {
                     }
                 }
             });
-
         }
 
         @Override
@@ -404,6 +349,31 @@ public class Playlist_Tracks extends BaseActivity {
 
         @Override
         public void onSetSwipeBackground(MyAdapter.MyViewHolder holder, int position, @SwipeableItemDrawableTypes int type) {
+        }
+
+        @Override
+        public void songStateChanged(Player.SongState state) {
+            //holder.itemView.setSelected(false);
+            // notifyItemChanged(selectedPos);
+            //mItems
+            if (mItems.size() > playlistCounter + 1 && state == Player.SongState.STOPPED) {
+                playlistCounter++;
+                MyItem item = mItems.get(playlistCounter);
+                //notifyItemChanged(selectedPos+1);
+                SharedPreferences preferences = context.getSharedPreferences(context.getPackageName() + "_preferences", MODE_PRIVATE);
+                //setRecording(item.jsonObject,preferences.getInt(SetupActivity.PLAYLIST_DELAY_KEY,200));
+                MidiRecording recording = MidiRecording.createRecordingFromJson(item.jsonObject);
+                Player.playRecording(recording, this, 200);
+            } else if (mItems.size() <= playlistCounter + 1 && state == Player.SongState.STOPPED) {
+                main.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        playTrack.setImageResource(R.mipmap.play);
+                    }
+                });
+            }
+
+
         }
 
         interface Swipeable extends SwipeableItemConstants {
