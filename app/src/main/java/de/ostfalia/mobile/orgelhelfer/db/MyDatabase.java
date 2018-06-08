@@ -6,6 +6,9 @@ import android.arch.persistence.room.Database;
 import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.migration.Migration;
 
+/**
+ * Database class to register all tables with their Interfaces to the Database
+ */
 @Database(entities = {Kategorie.class, Playlist.class, Track.class}, version = 1, exportSchema = false)
 public abstract class MyDatabase extends RoomDatabase {
     public abstract KategorieDao kategorieDao();

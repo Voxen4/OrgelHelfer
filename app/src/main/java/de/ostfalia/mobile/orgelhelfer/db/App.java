@@ -4,6 +4,10 @@ import android.app.Application;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.migration.Migration;
 
+
+/**
+ * Singelton Class for the database
+ */
 public class App extends Application {
 
     public static App INSTANCE;
@@ -11,6 +15,7 @@ public class App extends Application {
 
     private MyDatabase database;
 
+    // Return intance of the database which was created before in method "oncreate"
     public static App get() {
         return INSTANCE;
     }
