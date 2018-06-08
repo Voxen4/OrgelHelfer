@@ -10,6 +10,8 @@ entwickelt werden würde, mit dem Unterschied, dass es eine Funktion zum automat
 über den Timewarp Algorithmus realisiert. 
 
 
+
+
 ## Funktionen des Programms
 * Abspielen/Aufnehmen von Midi-Songs
 * Speichern der Daten in Playlisten und Kategorien
@@ -17,8 +19,14 @@ entwickelt werden würde, mit dem Unterschied, dass es eine Funktion zum automat
 * Automatisches Weiterspielen von Songs
 * Dynamic Timewarp Algortithmus für das Weiterspielen
 
-Die App wurde bewusst simpel aufgebaut, da der Organist im fortgeschrittenen Alter ist.
 
 ## Referenzen/Frameworks/Libarys
 * [RecyclerView](https://github.com/h6ah4i/android-advancedrecyclerview) - Kategorie/Playlist Layout
 * [Room Database](https://developer.android.com/topic/libraries/architecture/room) - Datenbank für Kategorien/Playlisten/Tracks
+
+
+## Bedienung der App
+Die App wurde bewusst simpel aufgebaut, da der Organist im fortgeschrittenen Alter ist. 
+
+### Main Activity
+![alt text|(https://imgur.com/a/VmtqXz2)
