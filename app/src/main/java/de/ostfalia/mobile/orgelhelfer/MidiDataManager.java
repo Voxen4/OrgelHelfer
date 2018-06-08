@@ -17,6 +17,7 @@ import de.ostfalia.mobile.orgelhelfer.model.MidiProgram;
 
 /**
  * Created by kellerm on 23.04.2018.
+ * Singelton handeling MidiData it converts MidiData into MidiEvents and sends those MidiEvents to {@link OnMidiDataListener}.
  */
 
 public class MidiDataManager {
@@ -64,6 +65,13 @@ public class MidiDataManager {
     }
 
     //Input Port has to be opened first.
+
+    /**
+     * Sends a given MidiEvent to the MidiDevice, the Raw Data gets
+     * parsed and send trough the inputPort of the registered {@link MidiReceiver}
+     *
+     * @param event
+     */
     public void sendEvent(MidiEvent event) {
         //TODO Is every Event solved by sending it like that ?
         MidiInputPort inputPort = MidiConnectionManager.getInstance().getInputPort();

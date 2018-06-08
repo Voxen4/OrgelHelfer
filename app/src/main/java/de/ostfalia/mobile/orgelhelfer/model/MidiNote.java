@@ -7,6 +7,7 @@ import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 
 /**
  * Created by kellerm on 20.05.2018.
+ * Class representing a interpreted MidiNote Event, contains The channel,pitch and velocity of the Note
  */
 
 public class MidiNote extends MidiEvent {

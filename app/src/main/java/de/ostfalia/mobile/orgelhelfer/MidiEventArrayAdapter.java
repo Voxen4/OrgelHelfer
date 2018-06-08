@@ -12,6 +12,9 @@ import java.util.List;
 
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 
+/**
+ * Custom ArrayAdapter for the ListView in {@link de.ostfalia.mobile.orgelhelfer.activitys.ConnectActivity}
+ */
 public class MidiEventArrayAdapter extends ArrayAdapter<MidiEvent> {
     private static LayoutInflater inflater = null;
     private Activity activity;

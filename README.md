@@ -29,9 +29,10 @@ entwickelt werden würde, mit dem Unterschied, dass es eine Funktion zum automat
 Die App wurde bewusst simpel aufgebaut, da der Organist im fortgeschrittenen Alter ist. 
 
 ### Main Activity
-<img src="Images/Screenshot_1528454697.png" width="200" heigth="200">
+<img src="Images/Main_Activity.png" width="300" heigth="300">
 
-### Connect Activity
+### Abspielen Activity(Connect Activity)
+<img src="Images/Connect_Activity.gif" width="300" heigth="300">
 
 ### Playlist Activty
 

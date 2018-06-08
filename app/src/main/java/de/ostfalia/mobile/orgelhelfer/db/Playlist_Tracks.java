@@ -35,20 +35,23 @@ import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.activitys.BaseActivity;
 import de.ostfalia.mobile.orgelhelfer.activitys.PlaylistActivity;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
-import de.ostfalia.mobile.orgelhelfer.services.Player;
+import de.ostfalia.mobile.orgelhelfer.util.Player;
 
+/**
+ * Activity that shows and handles the tracks of a certain playlist.
+ * Tracks can be added or deleted from the database {@link MyDatabase} with its entity {@link Track} in {@link TrackDao}.
+ * Plays the Tracks with {@link MidiRecording} in the given order.
+ *
+ */
 
 public class Playlist_Tracks extends BaseActivity {
 
-
-    private static final String LOG_TAG = Playlist_Tracks.class.getSimpleName();
     public static MidiRecording midiRecording;
     private static int counter = 0;
     private static Playlist_Tracks main;
     private static Context context;
     private static ImageView playTrack;
     public List<Track> data;
-    private TextView playlistName;
     private MyDatabase database;
     private MyAdapter adapter = null;
     private Track temp;
@@ -57,19 +60,32 @@ public class Playlist_Tracks extends BaseActivity {
     private String[] tracknames;
     private int playlistUID;
 
+    /**
+     *  Gets the parcelable object Playlist from {@link PlaylistActivity} when creating. The tracks in this activity refer
+     *  to this certain playlist.
+     *  Sets the different layouts, tools and adapters. Handles the swiping of certain tracks.
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist__tracks);
         Playlist_Tracks.context = getApplicationContext();
+        main = Playlist_Tracks.this;
 
         Bundle dataFromPlaylist = getIntent().getExtras();
         playlist = dataFromPlaylist.getParcelable("playlistName");
         playlistUID = dataFromPlaylist.getInt("id");
 
+        android.support.v7.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setBackgroundColor(Color.TRANSPARENT);
+        toolbar.setTitle(playlist.text);
+
 
         playTrack = findViewById(R.id.playTrack);
 
+        /* Calls the old tracks */
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -80,18 +96,16 @@ public class Playlist_Tracks extends BaseActivity {
         }).start();
 
 
-        main = Playlist_Tracks.this;
+
         final RecyclerView recyclerView = findViewById(R.id.recyclerview);
         RecyclerViewSwipeManager swipeMgr = new RecyclerViewSwipeManager();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         adapter = new MyAdapter();
 
-        android.support.v7.widget.Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setBackgroundColor(Color.TRANSPARENT);
-        toolbar.setTitle(playlist.text);
 
+
+        /* Calls method to add a track to the playlist */
         ImageView trackHinzufuegen = findViewById(R.id.trackHinzufügen);
         trackHinzufuegen.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,7 +116,7 @@ public class Playlist_Tracks extends BaseActivity {
         });
 
 
-        //Swipe zum Löschen der Daten!
+        /* removes a track with swiping */
         swipeMgr.setOnItemSwipeEventListener(new RecyclerViewSwipeManager.OnItemSwipeEventListener() {
             public void onItemSwipeStarted(int position) {
             }
@@ -124,7 +138,7 @@ public class Playlist_Tracks extends BaseActivity {
         });
 
 
-        // Erstellen der Datenbank bei Öffnen der Activity
+        /* When creating the activity the database needs to load the tracks */
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -143,11 +157,16 @@ public class Playlist_Tracks extends BaseActivity {
         recyclerView.setAdapter(swipeMgr.createWrappedAdapter(adapter));
         swipeMgr.attachRecyclerView(recyclerView);
 
+
         if (midiRecording != null) {
             playTrack.setEnabled(true);
         }
     }
 
+    /**
+     * loads the given songs from the file where the tracks are saved
+     * @param view
+     */
     public void loadRecordings(View view) {
 
 
@@ -212,7 +231,9 @@ public class Playlist_Tracks extends BaseActivity {
 
     }
 
-
+    /**
+     * static class that represents the item for the database (in this case the tracks)
+     */
 
     static class MyItem {
         public final long id;
@@ -228,13 +249,15 @@ public class Playlist_Tracks extends BaseActivity {
         }
     }
 
-
+    /**
+     * the adapter to handle the recyclerview and the swiping of the items
+     */
     static class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> implements SwipeableItemAdapter<MyAdapter.MyViewHolder>, Player.SongStateCallback {
         List<MyItem> mItems;
         MyAdapter thizAdapter;
         private int selectedPos = RecyclerView.NO_POSITION;
         private int playlistCounter;
-        private MyViewHolder holder;
+
 
         public MyAdapter() {
             setHasStableIds(true); // this is required for swiping feature.
@@ -242,6 +265,12 @@ public class Playlist_Tracks extends BaseActivity {
             thizAdapter = this;
         }
 
+        /**
+         * Creates a new item (track)
+         * increasing counter for the id
+         * @param trackTitle
+         * @param jsonObject
+         */
         public void createnewItem(String trackTitle, JSONObject jsonObject) {
 
             mItems.add(new MyItem(counter, trackTitle, jsonObject));
@@ -266,6 +295,12 @@ public class Playlist_Tracks extends BaseActivity {
             return new MyAdapter.MyViewHolder(v);
         }
 
+        /**
+         * the holder that changes the view to the selected item
+         * @param holder
+         * @param position
+         */
+
         @Override
         public void onBindViewHolder(final MyAdapter.MyViewHolder holder, final int position) {
             final MyItem item = mItems.get(position);
@@ -289,11 +324,23 @@ public class Playlist_Tracks extends BaseActivity {
 
         }
 
+
+        /**
+         * sets the chosen track in the playlist
+         * @param recordingJson
+         */
         private void setRecording(JSONObject recordingJson) {
             setRecording(recordingJson, 0);
 
         }
 
+        /**
+         * sets the next track in the playlist with a delay of sleepTimer
+         * Parses a Json Object to a MidiRecording and saves it in a variable,
+         * also set's the ClickListener for the Play Button and reset's it state.
+         * @param recordingJson
+         * @param sleepTimer
+         */
         private void setRecording(JSONObject recordingJson, final int sleepTimer) {
             midiRecording = MidiRecording.createRecordingFromJson(recordingJson);
             playTrack.setEnabled(true);
@@ -351,6 +398,10 @@ public class Playlist_Tracks extends BaseActivity {
         public void onSetSwipeBackground(MyAdapter.MyViewHolder holder, int position, @SwipeableItemDrawableTypes int type) {
         }
 
+        /**
+         * handles the changed songstate
+         * @param state
+         */
         @Override
         public void songStateChanged(Player.SongState state) {
             //holder.itemView.setSelected(false);
@@ -398,6 +449,9 @@ public class Playlist_Tracks extends BaseActivity {
             }
         }
 
+        /**
+         * Sets the Viewholder with its views
+         */
         class MyViewHolder extends AbstractSwipeableItemViewHolder {
             FrameLayout containerView;
             TextView textView;

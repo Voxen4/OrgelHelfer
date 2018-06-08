@@ -22,6 +22,9 @@ import java.io.File;
 import de.ostfalia.mobile.orgelhelfer.BuildConfig;
 import de.ostfalia.mobile.orgelhelfer.R;
 
+/**
+ * Activity to handle different settings and see information about the application
+ */
 
 public class SetupActivity extends ListActivity {
 
@@ -34,6 +37,11 @@ public class SetupActivity extends ListActivity {
     private TextView versionText;
     private TextView mailContact;
 
+    /**
+     * Shows different information about the application.
+     * Sets the delaytime of the playlist with SharedPreferences
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +91,10 @@ public class SetupActivity extends ListActivity {
 
     }
 
+    /**
+     * shows the FilePickerDialog to choose the destination folder to save the json objects
+     * @param view
+     */
     private void showPathPickerDialog(View view) {
         DialogProperties properties = new DialogProperties();
         properties.selection_mode = DialogConfigs.SINGLE_MODE;

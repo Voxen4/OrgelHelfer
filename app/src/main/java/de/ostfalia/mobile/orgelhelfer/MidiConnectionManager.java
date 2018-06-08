@@ -20,6 +20,8 @@ import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 
 /**
  * Created by kellerm on 23.04.2018.
+ * Singelton handleing the Connection to a MidiDevice, opens it ports and provides
+ * a Listener to notify Classes when there is a Change of available MidiDevices
  */
 
 public class MidiConnectionManager extends MidiManager.DeviceCallback implements MidiManager.OnDeviceOpenedListener {

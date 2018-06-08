@@ -1,4 +1,4 @@
-package de.ostfalia.mobile.orgelhelfer.services;
+package de.ostfalia.mobile.orgelhelfer.util;
 
 import android.util.Log;
 
@@ -11,7 +11,9 @@ import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
 
 
 /**
- * Created by Aaron on 01.06.2018.
+ * Created by mkeller on 01.06.2018.
+ * Helper Class to Play a MidiRecording, creates a Thread and loops trough the MidiEvents in the MidiRecording.
+ * Callbacks on Start of a MidiRecording and after it Stopped. {@see SongStateCallback}
  */
 
 public class Player {
@@ -19,7 +21,14 @@ public class Player {
     private static final String LOG_TAG = Player.class.getSimpleName();
     private static boolean IS_RECORDING_PLAYING = false;
 
-    public synchronized static void playRecording(final MidiRecording recording, final SongStateCallback callback, final int startDelay) {
+    /**
+     * Method to start playing a MidiRecording
+     *
+     * @param recording  - The MidiRecording
+     * @param callback   - Callback Listener
+     * @param startDelay - Delay before Recording starts Playing.
+     */
+    public static synchronized void playRecording(final MidiRecording recording, final SongStateCallback callback, final int startDelay) {
         Log.d(LOG_TAG, "Start Playing the Recording");
 
         new Thread(new Runnable() {
@@ -72,10 +81,21 @@ public class Player {
 
                 start();
     }
+
+    /**
+     * Method to start playing a MidiRecording
+     * @param recording - The MidiRecording
+     * @param callback - Callback Listener
+     */
     public static void playRecording(final MidiRecording recording, final SongStateCallback callback) {
         playRecording(recording, callback, 0);
     }
 
+    /**
+     * Notifys the Callback if it's not null of the given state
+     * @param callback - Callback Listener
+     * @param state - {@link SongState}
+     */
     private static void notifyCallback(SongStateCallback callback, SongState state) {
         if (callback != null) {
             Log.d(LOG_TAG, "New Player State " + state.toString());
@@ -95,6 +115,9 @@ public class Player {
         PLAYING, STOPPED
     }
 
+    /**
+     * Interface to provide a Callback to {@link SongState} changes
+     */
     public interface SongStateCallback {
         void songStateChanged(SongState state);
     }

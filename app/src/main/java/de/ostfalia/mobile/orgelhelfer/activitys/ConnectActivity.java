@@ -46,12 +46,18 @@ import de.ostfalia.mobile.orgelhelfer.db.Track;
 import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
 import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
-import de.ostfalia.mobile.orgelhelfer.services.Player;
+import de.ostfalia.mobile.orgelhelfer.util.Player;
 
 import static android.widget.AdapterView.OnItemClickListener;
 import static android.widget.AdapterView.OnItemSelectedListener;
 import static de.ostfalia.mobile.orgelhelfer.activitys.SetupActivity.DATEIPFAD_KEY;
 
+/**
+ * Activtiy to handle the connecting to a MidiDevice if the Auto Connect connect's to a undesired MidiDevice.
+ * Furthermore it Handles the Recording of {@link MidiRecording} it transfer's it into a JsonObject then stores
+ * it in the DB{@link de.ostfalia.mobile.orgelhelfer.db.MyDatabase} and SD Card.
+ * The Activity also handles showing incoming {@link MidiEvent} in a ListView
+ */
 public class ConnectActivity extends BaseActivity implements MidiDataManager.OnMidiDataListener, Player.SongStateCallback {
 
     private static final String LOG_TAG = ConnectActivity.class.getSimpleName();
@@ -66,6 +72,12 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
     private ConnectActivity thizClazz;
     private String trackname = "";
 
+
+    /**
+     * OnCreate of the ConnectActivity, handles setting up Listeners, ArraysAdapters and ClickListeners
+     *
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,13 +136,19 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
         thizClazz = this;
     }
 
-
+    /**
+     * onPause removes the Activity from the {@link de.ostfalia.mobile.orgelhelfer.MidiDataManager.OnMidiDataListener}
+     */
     @Override
     public void onPause() {
         super.onPause();
         MidiDataManager.getInstance().removeOnMidiDataListener(this);
     }
 
+
+    /**
+     * onPause adds the Activity back to the {@link de.ostfalia.mobile.orgelhelfer.MidiDataManager.OnMidiDataListener}
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -138,7 +156,11 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
         //stopService();
     }
 
-
+    /**
+     * Method used by the Start/Stop Recording, get's called on a Click.
+     * It starts the Recording of the {@link MidiRecording} as a JsonObject and Calls the Dialog to Save the JsonObject{@see ConnectActivity#showSaveRecordingDialog}.
+     * @param view
+     */
     public void startRecording(View view) {
         final Button recordButton = (Button) view;
 
@@ -173,6 +195,12 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
         Log.d(LOG_TAG, "Switched recording state");
     }
 
+    /**
+     * Method from the {@link de.ostfalia.mobile.orgelhelfer.MidiDataManager.OnMidiDataListener},
+     * MidiEvent's get Added to the current {@link MidiRecording} if it's being recorded currently
+     * and added to the ListView of this Activity.
+     * @param event
+     */
     @Override
     public void onMidiData(final MidiEvent event) {
         runOnUiThread(new Runnable() {
@@ -206,6 +234,10 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
         spinner.setAdapter(arrayAdapter);
     }
 
+    /**
+     * Method getting called by the SaveDialog, saves the Current MidiRecording JsonObject on the SDCard with the given Name.
+     * @param name
+     */
     public void writeMidiJsonExternal(String name) {
         Writer output = null;
         if (jsonData == null) {
@@ -228,6 +260,11 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
         }
     }
 
+    /**
+     * Save Recording Dialog, displays a TextField where the User can enter a name for the Recording.
+     * It also shows a Spinner with Genre's{@link Kategorie} for the Song.
+     * If the User chooses to save the Recording the file gets written to the SdCard and the Combination of Genre + MidiRecording get's saved in the DB aswell.
+     */
     public void showSaveRecordingDialog() {
         //Usage of Layoutinfalter with Custom layout: https://goo.gl/FNdUjN
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
@@ -278,6 +315,11 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
 
     }
 
+    /**
+     * Method getting called by the ClickListener of the LoadRecording Button, shows a FilePicker dialog where the User can pick a MidiRecording's Json Object
+     * and calls {@link ConnectActivity#setRecording(JSONObject)} with it.
+     * @param view
+     */
     public void loadRecordings(View view) {
         DialogProperties properties = new DialogProperties();
         properties.selection_mode = DialogConfigs.SINGLE_MODE;
@@ -318,6 +360,10 @@ public class ConnectActivity extends BaseActivity implements MidiDataManager.OnM
 
     }
 
+    /**
+     * Parses a Json Object to a MidiRecording and saves it in a variable, also set's the ClickListener for the Play Button and reset's it stae.
+     * @param recordingJson
+     */
     private void setRecording(JSONObject recordingJson) {
         midiRecording = MidiRecording.createRecordingFromJson(recordingJson);
         //startPlayerService();

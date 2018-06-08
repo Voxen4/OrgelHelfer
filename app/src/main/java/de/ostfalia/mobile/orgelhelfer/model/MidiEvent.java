@@ -12,7 +12,7 @@ import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 
 /**
  * Created by kellerm on 23.04.2018.
- * Class representing a interpreted MidiKey Event, contains The Key Pressed and the "strength"?
+ * Base Class representing a interpreted MidiEvent Event, contains The Raw Data , Type and timestamp of the Event.
  */
 
 public class MidiEvent implements DtwComparable<MidiEvent> {
