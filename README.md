@@ -29,29 +29,24 @@ entwickelt werden würde, mit dem Unterschied, dass es eine Funktion zum automat
 Die App wurde bewusst simpel aufgebaut, da der Organist im fortgeschrittenen Alter ist. 
 
 ### Main Activity
-Die Main Activity ist nur zum Weiterleiten auf die jeweiligen Menüpunkte gedacht.
 <img src="Images/Main_Activity.png" width="300" heigth="300">
-
-
+Die Main Activity ist nur zum Weiterleiten auf die jeweiligen Menüpunkte gedacht.
 
 ### Abspielen Activity(Connect Activity)
 <img src="Images/Connect_Activity.gif" width="300" heigth="300">
+In der Abspiel Activity werden die einzelnen Songs aufgenommen und einer Kategorie zugeordnet. Unter den drei Buttons werden die jeweiligen Noten angezeigt, die beim Spielen auf dem Keyboard übertragen werden. Um einen einzelnen Song abzuspielen, wird über "Load Song" der Song geladen und über "Play" dann abgespielt.(Der Algorithmus greift hier nicht)
 
 
 ### Playlist Activty
 <img src="Images/Playlist_Activity.gif" width="300" heigth="300">
+Die Playlist Activity wurde konzipiert um dem Organisten die Möglichkeit zu geben im Vorraus seine Musikauswahl zu sortieren und diese nacheinander abspielen zu lassen. Tracks können im Prototypen nur einer Playlist hinzugefügt werden. Dies wird über einen Fremdschlüssel in der Klasse "Track" realisiert.
 
-
-### Setup Activity
-<img src="Images/Setup_Activity.png" width="300" heigth="300">
 
 
 ### Kategorie Activity
 <img src="Images/Kategorie_Activity.gif" width="300" heigth="300">
 
 
+### Setup Activity
+<img src="Images/Setup_Activity.png" width="300" heigth="300">
 
-
-
-## Weiterentwicklung
-Sollte eine Weiterentwicklung geplant sein 
