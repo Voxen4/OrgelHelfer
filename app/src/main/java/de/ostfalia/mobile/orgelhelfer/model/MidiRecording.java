@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
-import de.ostfalia.mobile.orgelhelfer.midi.MidiPrinter;
 
+/**
+ * Class Representing a MidiRecording, offers methods to parse JsonObjects to MidiRecording and contains a List of MidiEvents.
+ */
 public class MidiRecording {
     private static final String LOG_TAG = MidiRecording.class.getSimpleName();
     long startingTimestamp;

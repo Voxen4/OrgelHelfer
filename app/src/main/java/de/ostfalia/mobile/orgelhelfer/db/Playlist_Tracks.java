@@ -35,7 +35,7 @@ import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.activitys.BaseActivity;
 import de.ostfalia.mobile.orgelhelfer.activitys.PlaylistActivity;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
-import de.ostfalia.mobile.orgelhelfer.services.Player;
+import de.ostfalia.mobile.orgelhelfer.util.Player;
 
 
 public class Playlist_Tracks extends BaseActivity {

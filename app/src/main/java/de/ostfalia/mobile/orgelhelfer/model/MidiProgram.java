@@ -4,6 +4,7 @@ import de.ostfalia.mobile.orgelhelfer.midi.MidiConstants;
 
 /**
  * Created by kellerm on 20.05.2018.
+ * Class representing a interpreted MidiProgram Event
  */
 
 public class MidiProgram extends MidiEvent {

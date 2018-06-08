@@ -75,6 +75,9 @@ public class MidiConstants {
         return (goodBytes == 0);
     }
 
+    /**
+     * Enum to Classify MidiMessages, the Value represents the StatusByte that shows what Type of MidiMessage the Message is.
+     */
     public enum MessageTypes {
         STATUS_COMMAND_MASK((byte) 0xF0),
         STATUS_CHANNEL_MASK((byte) 0x0F),
