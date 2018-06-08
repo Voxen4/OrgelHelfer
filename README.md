@@ -45,8 +45,10 @@ Die Playlist Activity wurde konzipiert um dem Organisten die Möglichkeit zu geb
 
 ### Kategorie Activity
 <img src="Images/Kategorie_Activity.gif" width="300" heigth="300">
+Die Kategorie Activty funktioniert vom Prinzip her genauso wie die Playlist Activity.Es können einzelne Kategorien angelegt werden und diese können bei der Erstellung von Songs zugewiesen werden. Auch hier gilt, ein Track kann zurzeit einer Kategorie hinzugefügt werden. Die Kategorie wird auch über einen Fremdschlüssel gesetzt.
 
 
 ### Setup Activity
 <img src="Images/Setup_Activity.png" width="300" heigth="300">
+Die Setup Activity war dazu gedacht um dem Nutzer die Möglichkeit zu geben die App zu personalisieren. In der jetzigen Version kann der Pfad zum Speichern der einzelnen Tracks bestimmt werden.
 
