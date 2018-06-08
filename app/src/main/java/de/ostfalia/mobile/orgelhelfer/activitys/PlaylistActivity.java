@@ -37,15 +37,26 @@ import de.ostfalia.mobile.orgelhelfer.db.MyDatabase;
 import de.ostfalia.mobile.orgelhelfer.db.Playlist;
 import de.ostfalia.mobile.orgelhelfer.db.Playlist_Tracks;
 
+/**
+ * Activity that shows and handles the playlists.
+ * Playlists can be added or deleted from the database {@link MyDatabase} with
+ * its entity {@link Playlist} in {@link de.ostfalia.mobile.orgelhelfer.db.PlaylistDao}.
+ */
+
 public class PlaylistActivity extends AppCompatActivity {
 
-    private static final String LOG_TAG = PlaylistActivity.class.getSimpleName();
+
     public static List<Playlist> playlistData;
     private static int counter = 0;
     public Playlist playlist;
     private MyDatabase database;
     private PlaylistActivity.MyAdapter adapter = null;
     private ImageView erstellen;
+
+    /**
+     *  Sets the different layouts, tools and adapters. Handles the swiping of certain playlists.
+     * @param savedInstanceState
+     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +73,7 @@ public class PlaylistActivity extends AppCompatActivity {
 
         erstellen = (findViewById(R.id.playlistHinzufügen));
 
-        //Swipe zum Löschen der Daten!
+        /* removes a playlist with swiping */
         swipeMgr.setOnItemSwipeEventListener(new RecyclerViewSwipeManager.OnItemSwipeEventListener() {
             public void onItemSwipeStarted(int position) {
             }
@@ -91,7 +102,7 @@ public class PlaylistActivity extends AppCompatActivity {
 
 
 
-        // Erstellen der Datenbank bei Öffnen der Activity
+        /* When creating the activity the database needs to load the playlists */
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -110,6 +121,7 @@ public class PlaylistActivity extends AppCompatActivity {
 
         swipeMgr.attachRecyclerView(recyclerView);
 
+        /* Adding a new playlist */
         erstellen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -156,6 +168,11 @@ public class PlaylistActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * static class that represents the item for the database (in this case the playlists)
+     * needs to implement Parcelable, because it has to transfer the playlist to {@link Playlist_Tracks}
+     */
+
     public static class MyItem implements Parcelable {
         public static final Parcelable.Creator<MyItem> CREATOR = new Parcelable.Creator<MyItem>() {
 
@@ -192,6 +209,9 @@ public class PlaylistActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * the adapter to handle the recyclerview and the swiping of the items
+     */
     static class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> implements SwipeableItemAdapter<MyAdapter.MyViewHolder> {
         List<MyItem> mItems;
 
@@ -200,6 +220,11 @@ public class PlaylistActivity extends AppCompatActivity {
             mItems = new ArrayList<>();
         }
 
+        /**
+         * Creates a new item (playlist)
+         * @param playlistName
+         * increasing counter for the id
+         */
         public void createnewItem(String playlistName) {
             mItems.add(new MyItem(counter, playlistName));
             counter++;
@@ -217,6 +242,11 @@ public class PlaylistActivity extends AppCompatActivity {
             return new MyAdapter.MyViewHolder(v);
         }
 
+        /**
+         * the holder that changes the view to the selected item
+         * @param holder
+         * @param position
+         */
         @Override
         public void onBindViewHolder(final MyAdapter.MyViewHolder holder, final int position) {
             final MyItem item = mItems.get(position);
@@ -270,6 +300,9 @@ public class PlaylistActivity extends AppCompatActivity {
         interface Swipeable extends SwipeableItemConstants {
         }
 
+        /**
+         * Sets the Viewholder with its views
+         */
         static class MyViewHolder extends AbstractSwipeableItemViewHolder {
             FrameLayout containerView;
             TextView textView;
