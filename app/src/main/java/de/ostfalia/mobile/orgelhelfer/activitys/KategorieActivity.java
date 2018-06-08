@@ -4,17 +4,14 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
@@ -26,7 +23,6 @@ import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultAct
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.annotation.SwipeableItemDrawableTypes;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.annotation.SwipeableItemResults;
 import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractSwipeableItemViewHolder;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -177,7 +173,7 @@ public class KategorieActivity extends BaseActivity {
             textView = itemView.findViewById(android.R.id.text1);
             textView.setTextSize(25);
 
-            textView.setTextAppearance(R.style.fontForNotificationLandingPage);
+            textView.setTextAppearance(R.style.textstyle);
         }
 
         @Override

@@ -2,32 +2,19 @@ package de.ostfalia.mobile.orgelhelfer.db;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.media.midi.MidiDeviceInfo;
-import android.media.midi.MidiManager;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.AlteredCharSequence;
-import android.text.SpannableString;
-import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
@@ -50,20 +37,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import de.ostfalia.mobile.orgelhelfer.MidiConnectionManager;
-import de.ostfalia.mobile.orgelhelfer.MidiDataManager;
-import de.ostfalia.mobile.orgelhelfer.MidiEventArrayAdapter;
 import de.ostfalia.mobile.orgelhelfer.R;
-
 import de.ostfalia.mobile.orgelhelfer.activitys.BaseActivity;
 import de.ostfalia.mobile.orgelhelfer.activitys.PlaylistActivity;
-import de.ostfalia.mobile.orgelhelfer.midi.CustomMidiDeviceInfo;
-import de.ostfalia.mobile.orgelhelfer.model.MidiEvent;
 import de.ostfalia.mobile.orgelhelfer.model.MidiRecording;
 import de.ostfalia.mobile.orgelhelfer.services.Player;
 
@@ -72,17 +51,17 @@ public class Playlist_Tracks extends BaseActivity {
 
 
     private static final String LOG_TAG = Playlist_Tracks.class.getSimpleName();
-    private TextView playlistName;
-    private MyDatabase database;
-    private static int counter = 0;
-    private MyAdapter adapter = null;
-    public List<Track> data;
-    private Track temp;
-    private PlaylistActivity.MyItem playlist;
     public static MidiRecording midiRecording;
+    private static int counter = 0;
     private static Playlist_Tracks main;
     private static Context context;
     private static ImageView playTrack;
+    public List<Track> data;
+    private TextView playlistName;
+    private MyDatabase database;
+    private MyAdapter adapter = null;
+    private Track temp;
+    private PlaylistActivity.MyItem playlist;
     private List<Track> tracks;
     private String[] tracknames;
     private int playlistUID;
@@ -306,29 +285,6 @@ public class Playlist_Tracks extends BaseActivity {
 
 
     static class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> implements SwipeableItemAdapter<MyAdapter.MyViewHolder> {
-        interface Swipeable extends SwipeableItemConstants {
-        }
-
-
-        class MyViewHolder extends AbstractSwipeableItemViewHolder {
-            FrameLayout containerView;
-            TextView textView;
-
-            public MyViewHolder(View itemView) {
-                super(itemView);
-                containerView = itemView.findViewById(R.id.container);
-                textView = itemView.findViewById(android.R.id.text1);
-                textView.setTextSize(25);
-
-                textView.setTextAppearance(R.style.fontForNotificationLandingPage);
-            }
-
-            @Override
-            public View getSwipeableContainerView() {
-                return containerView;
-            }
-        }
-
         List<MyItem> mItems;
         private int selectedPos = RecyclerView.NO_POSITION;
 
@@ -385,7 +341,6 @@ public class Playlist_Tracks extends BaseActivity {
 
         }
 
-
         private void setRecording(JSONObject recordingJson) {
             midiRecording = MidiRecording.createRecordingFromJson(recordingJson);
             playTrack.setEnabled(true);
@@ -416,7 +371,6 @@ public class Playlist_Tracks extends BaseActivity {
 
         }
 
-
         @Override
         public int getItemCount() {
             return mItems.size();
@@ -445,6 +399,9 @@ public class Playlist_Tracks extends BaseActivity {
         public void onSetSwipeBackground(MyAdapter.MyViewHolder holder, int position, @SwipeableItemDrawableTypes int type) {
         }
 
+        interface Swipeable extends SwipeableItemConstants {
+        }
+
         static class MySwipeResultActionRemoveItem extends SwipeResultActionRemoveItem {
             private Playlist_Tracks.MyAdapter adapter;
             private int position;
@@ -461,6 +418,25 @@ public class Playlist_Tracks extends BaseActivity {
                 adapter.mItems.remove(position);
                 adapter.notifyItemRemoved(position);
 
+            }
+        }
+
+        class MyViewHolder extends AbstractSwipeableItemViewHolder {
+            FrameLayout containerView;
+            TextView textView;
+
+            public MyViewHolder(View itemView) {
+                super(itemView);
+                containerView = itemView.findViewById(R.id.container);
+                textView = itemView.findViewById(android.R.id.text1);
+                textView.setTextSize(25);
+
+                textView.setTextAppearance(R.style.textstyle);
+            }
+
+            @Override
+            public View getSwipeableContainerView() {
+                return containerView;
             }
         }
     }

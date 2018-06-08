@@ -10,7 +10,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,24 +31,21 @@ import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractSwipeableItemView
 import java.util.ArrayList;
 import java.util.List;
 
-import de.ostfalia.mobile.orgelhelfer.db.Kategorie;
-import de.ostfalia.mobile.orgelhelfer.db.Playlist_Tracks;
 import de.ostfalia.mobile.orgelhelfer.R;
 import de.ostfalia.mobile.orgelhelfer.db.App;
 import de.ostfalia.mobile.orgelhelfer.db.MyDatabase;
 import de.ostfalia.mobile.orgelhelfer.db.Playlist;
+import de.ostfalia.mobile.orgelhelfer.db.Playlist_Tracks;
 
 public class PlaylistActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = PlaylistActivity.class.getSimpleName();
-    private MyDatabase database;
-    private static int counter = 0;
-    private PlaylistActivity.MyAdapter adapter = null;
     public static List<Playlist> playlistData;
-    private ImageView erstellen;
-
+    private static int counter = 0;
     public Playlist playlist;
-
+    private MyDatabase database;
+    private PlaylistActivity.MyAdapter adapter = null;
+    private ImageView erstellen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,6 +157,16 @@ public class PlaylistActivity extends AppCompatActivity {
     }
 
     public static class MyItem implements Parcelable {
+        public static final Parcelable.Creator<MyItem> CREATOR = new Parcelable.Creator<MyItem>() {
+
+            public MyItem createFromParcel(Parcel in) {
+                return new MyItem(in);
+            }
+
+            public MyItem[] newArray(int size) {
+                return new MyItem[size];
+            }
+        };
         public final int id;
         public final String text;
 
@@ -168,11 +174,11 @@ public class PlaylistActivity extends AppCompatActivity {
             this.id = id;
             this.text = text;
         }
-
         public MyItem (Parcel in) {
             id = in.readInt();
             text = in.readString();
         }
+
         @Override
         public int describeContents() {
             return 0;
@@ -184,45 +190,9 @@ public class PlaylistActivity extends AppCompatActivity {
             dest.writeString(text);
 
         }
-
-        public static final Parcelable.Creator<MyItem> CREATOR = new Parcelable.Creator<MyItem>() {
-
-            public MyItem createFromParcel(Parcel in) {
-                return new MyItem(in);
-            }
-
-            public MyItem[] newArray(int size) {
-                return new MyItem[size];
-            }
-        };
     }
 
     static class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> implements SwipeableItemAdapter<MyAdapter.MyViewHolder> {
-        interface Swipeable extends SwipeableItemConstants {
-        }
-
-        static class MyViewHolder extends AbstractSwipeableItemViewHolder{
-            FrameLayout containerView;
-            TextView textView;
-
-            public MyViewHolder(View itemView) {
-                super(itemView);
-
-                containerView = itemView.findViewById(R.id.container);
-                textView = itemView.findViewById(android.R.id.text1);
-                textView.setTextSize(25);
-
-                textView.setTextAppearance(R.style.fontForNotificationLandingPage);
-
-            }
-
-            @Override
-            public View getSwipeableContainerView() {
-                return containerView;
-            }
-
-
-        }
         List<MyItem> mItems;
 
         public MyAdapter() {
@@ -295,6 +265,32 @@ public class PlaylistActivity extends AppCompatActivity {
 
         @Override
         public void onSetSwipeBackground(MyAdapter.MyViewHolder holder, int position, @SwipeableItemDrawableTypes int type) {
+        }
+
+        interface Swipeable extends SwipeableItemConstants {
+        }
+
+        static class MyViewHolder extends AbstractSwipeableItemViewHolder {
+            FrameLayout containerView;
+            TextView textView;
+
+            public MyViewHolder(View itemView) {
+                super(itemView);
+
+                containerView = itemView.findViewById(R.id.container);
+                textView = itemView.findViewById(android.R.id.text1);
+                textView.setTextSize(25);
+
+                textView.setTextAppearance(R.style.textstyle);
+
+            }
+
+            @Override
+            public View getSwipeableContainerView() {
+                return containerView;
+            }
+
+
         }
 
         static class MySwipeResultActionRemoveItem extends SwipeResultActionRemoveItem {

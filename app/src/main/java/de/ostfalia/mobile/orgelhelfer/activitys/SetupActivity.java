@@ -73,7 +73,7 @@ public class SetupActivity extends ListActivity {
                 showPathPickerDialog(v);
             }
         });
-        versionText = findViewById(R.id.textView14);
+        versionText = findViewById(R.id.versionAnzeige);
         versionText.setText(BuildConfig.VERSION_NAME);
         mailContact = findViewById(R.id.textView5);
         mailContact.setText(getString(R.string.mail_contact));
