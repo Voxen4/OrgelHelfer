@@ -56,34 +56,34 @@ public class SongsActivity extends BaseActivity {
     private static int kategorieID;
     public List<Kategorie> data;
     public List<Track> dataTrack;
-    public boolean flag = true;
     ImageView playTrack;
     private MyDatabase database;
     private MyAdapter adapter = null;
     private Track temp;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Bundle extras = getIntent().getExtras();
-        System.out.println(extras.getInt("ID"));
-        kategorieID = extras.getInt("ID");
-        System.out.println("KatID onCreate" + kategorieID);
+        kategorieID = extras.getInt("ID"); // Über den Intend.extra(aus der KategorieActivity wird die ID der Kategorie hier übergeben
 
         setContentView(R.layout.activity_song);
 
         RecyclerView recyclerView = findViewById(R.id.songsKategorie);
         playTrack = findViewById(R.id.playTrack);
+
+
+        //init für die swipeable Elements
+
         RecyclerViewSwipeManager expMgr = new RecyclerViewSwipeManager();
-
-
         expMgr.setOnItemSwipeEventListener(new RecyclerViewSwipeManager.OnItemSwipeEventListener() {
             public void onItemSwipeStarted(int position) {
             }
 
             public void onItemSwipeFinished(int position, int result, int afterSwipeReaction) {
-
+                //löscht ein Item nach dem swipen
                 if (result == 4 || result == 2) {
                     temp = dataTrack.get(position);
                     dataTrack.remove(position);
@@ -100,6 +100,8 @@ public class SongsActivity extends BaseActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
+        //erstellen eines Adapters zu welchem in einem neuen Thread alle Items (Tracks) einer bestimmten Kategorie hinzufügt.
+
         adapter = new MyAdapter();
 
         new Thread(new Runnable() {
@@ -108,10 +110,7 @@ public class SongsActivity extends BaseActivity {
                 database = App.get().getDB();
                 data = database.kategorieDao().getAll();
                 dataTrack = database.trackDao().loadAllKategorieTracks(kategorieID);
-                System.out.println(data);
-                System.out.println(kategorieID);
                 for (int i = 0; i < dataTrack.size(); i++) {
-                    System.out.println(dataTrack.get(i));
                     adapter.createnewItem(dataTrack.get(i).getTrackTitel());
                 }
             }
@@ -126,12 +125,14 @@ public class SongsActivity extends BaseActivity {
 
     }
 
+    //Diese Methode überprüft erst, ob ein lied ausgewählt ist. Wenn eins ausgewählt ist, so wird es nach drücken das Knopfes abgespielt
     public void playSongMethode(View view) {
         if (ConnectActivity.midiRecording != null) {
             Dtw dtw = Dtw.constructDTW(ConnectActivity.midiRecording.getRecordingList());
         }
     }
 
+    //Items, die zum MyAdapter hinzugefügt werden
     static class MyItem {
         public final long id;
         public final String text;
@@ -142,6 +143,7 @@ public class SongsActivity extends BaseActivity {
         }
     }
 
+    //Klasse über die das FrameLayout und Textview gespeichert werden
     static class MyViewHolder extends AbstractSwipeableItemViewHolder {
         FrameLayout containerView;
         TextView textView;
@@ -161,6 +163,8 @@ public class SongsActivity extends BaseActivity {
         }
     }
 
+
+    //Klasse die zum swipen benötigt wird und die ganzen Items/Tracks sin einer Liste speichert
     static class MyAdapter extends RecyclerView.Adapter<MyViewHolder> implements SwipeableItemAdapter<MyViewHolder> {
         List<MyItem> mItems;
 
@@ -169,6 +173,7 @@ public class SongsActivity extends BaseActivity {
             mItems = new ArrayList<>();
         }
 
+        //erstellt ein neues Item, welches der Liste hinzugefügt wird und setzt den Counter um1 höher damit es keine gleichen IDs gibt
         public void createnewItem(String kategorieName) {
             mItems.add(new MyItem(counter, kategorieName));
             counter++;
@@ -186,6 +191,7 @@ public class SongsActivity extends BaseActivity {
             return new MyViewHolder(v);
         }
 
+        
         //Ändern des ausgewählten songs
         @Override
         public void onBindViewHolder(MyViewHolder holder, final int position) {
